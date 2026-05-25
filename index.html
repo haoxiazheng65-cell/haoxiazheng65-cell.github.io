@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习仪表盘</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-card: #f8f9fa;
+  --bg-hover: #f1f3f5;
+  --text: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border: #e9ecef;
+  --accent: #4263eb;
+  --accent-light: #e8edff;
+  --green: #2b8a3e;
+  --green-bg: #ebfbee;
+  --orange: #e67700;
+  --orange-bg: #fff4e6;
+  --red: #c92a2a;
+  --red-bg: #fff5f5;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===== 顶部导航 ===== */
+.topbar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.nav-tabs { display: flex; gap: 4px; }
+
+.nav-tab {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover { background: var(--bg-hover); color: var(--text); }
+.nav-tab.active { background: var(--accent); color: #fff; }
+.nav-tab.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ===== 主容器 ===== */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+/* ===== 倒计时条 ===== */
+.countdown-bar {
+  background: linear-gradient(135deg, var(--accent) 0%, #5c7cfa 100%);
+  border-radius: var(--radius);
+  padding: 18px 24px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.countdown-bar .label { font-size: 13px; opacity: 0.85; }
+.countdown-bar .days { font-size: 40px; font-weight: 700; line-height: 1; }
+.countdown-bar .unit { font-size: 14px; margin-left: 4px; }
+.countdown-bar .date { font-size: 13px; opacity: 0.75; }
+
+/* ===== 统计卡片行 ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.stat-card .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.stat-card .stat-value { font-size: 24px; font-weight: 700; }
+.stat-card .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ===== 双栏布局 ===== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+/* ===== 通用卡片 ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title .badge {
+  font-size: 11px;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+/* ===== 今日任务 ===== */
+.task-list { list-style: none; }
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  cursor: pointer;
+}
+.task-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.task-checkbox {
+  width: 20px; height: 20px;
+  border-radius: 4px;
+  border: 2px solid var(--text-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.task-checkbox.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  font-size: 12px;
+}
+
+.task-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.task-tag.study { background: #e8edff; color: var(--accent); }
+.task-tag.quiz { background: var(--orange-bg); color: var(--orange); }
+.task-tag.review { background: var(--green-bg); color: var(--green); }
+.task-tag.dictation { background: #f3f0ff; color: #7950f2; }
+
+.task-link {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+.task-link:hover { opacity: 0.8; }
+
+/* ===== 科目进度 ===== */
+.subject-progress { display: flex; flex-direction: column; gap: 14px; }
+.subject-row { display: flex; align-items: center; gap: 12px; }
+.subject-name { font-size: 14px; font-weight: 500; width: 130px; flex-shrink: 0; }
+.subject-bar-wrap { flex: 1; height: 10px; background: #e9ecef; border-radius: 5px; overflow: hidden; }
+.subject-bar { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
+.subject-bar.econ { background: var(--accent); }
+.subject-bar.law { background: #7950f2; }
+.subject-bar.mgmt { background: #f76707; }
+.subject-bar.prac { background: var(--red); }
+.subject-pct { font-size: 13px; font-weight: 600; color: var(--text-secondary); width: 42px; text-align: right; flex-shrink: 0; }
+
+/* ===== 章节管理 ===== */
+.chapter-list { max-height: 420px; overflow-y: auto; }
+.chapter-group { margin-bottom: 16px; }
+.chapter-group-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.chapter-group-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.chapter-item:hover { background: var(--bg-hover); }
+
+.chapter-status {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chapter-status.todo { background: var(--text-muted); opacity: 0.4; }
+.chapter-status.doing { background: var(--orange); }
+.chapter-status.done { background: var(--green); }
+
+.chapter-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
+/* ===== 热力图 ===== */
+.heatmap { display: flex; gap: 4px; flex-wrap: wrap; }
+.heatmap-cell { width: 14px; height: 14px; border-radius: 3px; background: #e9ecef; }
+.heatmap-cell.l1 { background: #d0ebff; }
+.heatmap-cell.l2 { background: #74c0fc; }
+.heatmap-cell.l3 { background: #339af0; }
+.heatmap-cell.l4 { background: #1864ab; }
+
+/* ===== 数据图表区 ===== */
+.chart-placeholder {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+}
+
+/* ===== 底部操作区 ===== */
+.action-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #364fc7; }
+.btn-outline { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { background: var(--bg-hover); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: #ffe3e3; }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+
+/* ===== 弹窗 ===== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center; z-index: 200;
+}
+.modal {
+  background: var(--bg); border-radius: var(--radius); padding: 24px;
+  width: 500px; max-width: 90vw; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  max-height: 80vh; overflow-y: auto;
+}
+.modal h3 { font-size: 16px; margin-bottom: 16px; }
+.modal label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+.modal select, .modal input, .modal textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px; margin-bottom: 14px; outline: none;
+  font-family: inherit;
+}
+.modal select:focus, .modal input:focus, .modal textarea:focus { border-color: var(--accent); }
+.modal .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff; padding: 10px 24px;
+  border-radius: 20px; font-size: 13px; z-index: 300;
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ===== 子Tab导航 ===== */
+.subtabs {
+  display: flex; gap: 0; margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+}
+.subtab {
+  padding: 10px 20px; font-size: 14px; cursor: pointer;
+  border: none; background: transparent; color: var(--text-secondary);
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all 0.15s; white-space: nowrap;
+}
+.subtab:hover { color: var(--text); }
+.subtab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ===== 篇分组标题 ===== */
+.part-title {
+  font-size: 13px; font-weight: 700; color: var(--accent);
+  padding: 10px 0 6px; border-top: 1px solid var(--border);
+  margin-top: 12px; display: flex; align-items: center; gap: 8px;
+  cursor: pointer; user-select: none; transition: color 0.15s;
+}
+.part-title:hover { color: #2b4acb; }
+.part-title .part-expand-icon { font-size: 10px; color: var(--text-muted); transition: transform 0.2s; }
+.part-title:first-child { border-top: none; margin-top: 0; }
+.part-title .part-lectures { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+
+/* ===== 小节行（附讲次标注） ===== */
+.section-list { margin-left: 28px; margin-bottom: 4px; }
+.section-row {
+  display: flex; align-items: center; gap: 8px; padding: 5px 10px;
+  border-radius: 6px; font-size: 12px; cursor: pointer;
+  transition: background 0.15s; border-left: 2px solid transparent;
+}
+.section-row:hover { background: var(--bg-hover); border-left-color: var(--accent); }
+.section-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.section-status.todo { background: var(--text-muted); opacity: 0.35; }
+.section-status.doing { background: var(--orange); }
+.section-status.done { background: var(--green); }
+.section-lecture { font-size: 10px; color: var(--text-muted); background: #f1f3f5; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; }
+
+.chapter-expand {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; font-size: 10px; color: var(--text-muted);
+  cursor: pointer; transition: transform 0.2s; flex-shrink: 0;
+}
+.chapter-expand.open { transform: rotate(90deg); }
+.chapter-pct { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-left: auto; min-width: 36px; text-align: right; }
+
+.chapter-res-link {
+  font-size: 11px; color: var(--accent); margin-left: 4px;
+  cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+  opacity: 0; transition: opacity 0.15s;
+}
+.chapter-item:hover .chapter-res-link { opacity: 1; }
+.section-row .chapter-res-link { opacity: 1; }
+
+/* ===== 母题练习 ===== */
+.quiz-chapter-select {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.quiz-chapter-tag {
+  padding: 4px 12px; border-radius: 14px; font-size: 12px;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+  background: var(--bg); color: var(--text-secondary);
+}
+.quiz-chapter-tag:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-chapter-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.quiz-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+}
+.quiz-card .q-num { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.quiz-card .q-text { font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+.quiz-card .q-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.quiz-card .q-option {
+  padding: 8px 14px; border-radius: 6px; font-size: 13px;
+  background: var(--bg-card); cursor: pointer; transition: all 0.15s;
+}
+.quiz-card .q-option:hover { background: var(--accent-light); }
+.quiz-card .q-option.correct { background: var(--green-bg); color: var(--green); font-weight: 600; }
+.quiz-card .q-option.wrong { background: var(--red-bg); color: var(--red); }
+
+.quiz-answer {
+  display: none; padding: 12px; background: var(--green-bg);
+  border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 13px;
+  line-height: 1.8;
+}
+.quiz-answer.show { display: block; }
+.quiz-answer .answer-label { font-weight: 600; color: var(--green); }
+.quiz-self-eval { display: none; gap: 8px; margin-top: 8px; }
+.quiz-self-eval.show { display: flex; }
+.quiz-self-eval .eval-btn {
+  padding: 6px 16px; border-radius: 6px; font-size: 13px;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+}
+.eval-correct { background: var(--green-bg); color: var(--green); border-color: var(--green) !important; }
+.eval-correct:hover { background: #d3f9d8; }
+.eval-wrong { background: var(--red-bg); color: var(--red); border-color: var(--red) !important; }
+.eval-wrong:hover { background: #ffe3e3; }
+
+.quiz-stats {
+  display: flex; gap: 16px; margin-bottom: 16px; font-size: 13px;
+}
+.quiz-stats .stat { padding: 8px 16px; background: var(--bg-card); border-radius: var(--radius-sm); }
+.quiz-stats .stat .num { font-size: 20px; font-weight: 700; }
+
+/* ===== 默写回顾 ===== */
+.dictation-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+}
+.dictation-card .d-text { font-size: 14px; line-height: 2; margin-bottom: 10px; }
+.dictation-card .d-blank {
+  display: inline-block; min-width: 80px; border-bottom: 2px dashed var(--accent);
+  padding: 2px 8px; margin: 0 4px; color: var(--accent); font-weight: 600;
+  text-align: center; outline: none; background: var(--accent-light);
+}
+.dictation-card .d-input-row { display: flex; gap: 8px; align-items: center; }
+.dictation-card .d-input {
+  flex: 1; padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 14px; outline: none;
+}
+.dictation-card .d-input:focus { border-color: var(--accent); }
+.dictation-result {
+  display: none; padding: 10px 14px; border-radius: var(--radius-sm);
+  margin-top: 10px; font-size: 13px;
+}
+.dictation-result.show { display: block; }
+.dictation-result.right { background: var(--green-bg); color: var(--green); }
+.dictation-result.wrong-result { background: var(--red-bg); color: var(--red); }
+
+/* ===== 资料类型分组 ===== */
+.resource-section { margin-bottom: 20px; }
+.resource-section-title {
+  font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+.resource-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.resource-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px; cursor: pointer;
+  transition: all 0.15s; display: flex; align-items: center; gap: 10px;
+}
+.resource-card:hover { border-color: var(--accent); background: var(--accent-light); }
+.resource-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.resource-icon.book { background: #e8edff; color: var(--accent); }
+.resource-icon.video { background: #fff4e6; color: var(--orange); }
+.resource-icon.doc { background: #ebfbee; color: var(--green); }
+.resource-icon.list { background: #f3f0ff; color: #7950f2; }
+.resource-icon.star { background: #fff5f5; color: var(--red); }
+.resource-icon.quiz { background: #e6fcf5; color: #0ca678; }
+.resource-card .r-name { font-size: 13px; font-weight: 500; }
+.resource-card .r-type { font-size: 11px; color: var(--text-muted); }
+
+/* ===== 学习阶段 ===== */
+.stage-timeline { display: flex; gap: 12px; margin-bottom: 20px; }
+.stage-card {
+  flex: 1; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; text-align: center;
+}
+.stage-card .stage-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--accent-light); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; margin: 0 auto 8px;
+}
+.stage-card .stage-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.stage-card .stage-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+/* ===== 空状态 ===== */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .container { padding: 16px 12px; }
+  .resource-grid { grid-template-columns: repeat(2, 1fr); }
+  .stage-timeline { flex-direction: column; }
+  .subtab { padding: 8px 12px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<nav class="topbar">
+  <div class="logo">
+    <span class="logo-icon">学</span>
+    学习仪表盘
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="home">首页</button>
+    <button class="nav-tab" data-tab="yijian">一级建造师</button>
+    <button class="nav-tab disabled" data-tab="english">英语 <span style="font-size:10px;opacity:0.6">(待建)</span></button>
+    <button class="nav-tab disabled" data-tab="reading">阅读 <span style="font-size:10px;opacity:0.6">(待建)</span></button>
+    <button class="nav-tab disabled" data-tab="art">绘画 <span style="font-size:10px;opacity:0.6">(待建)</span></button>
+  </div>
+</nav>
+
+<!-- ===== 首页 ===== -->
+<div class="container" id="page-home">
+  <div class="countdown-bar">
+    <div>
+      <div class="label">距离一级建造师考试</div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <span class="days" id="countdown-days">--</span>
+        <span class="unit">天</span>
+      </div>
+    </div>
+    <div class="date">2026年9月22日</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">累计学习天数</div>
+      <div class="stat-value" id="stat-days">0</div>
+      <div class="stat-sub">连续打卡 <span id="stat-streak">0</span> 天</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">累计刷题</div>
+      <div class="stat-value" id="stat-questions">0</div>
+      <div class="stat-sub">道题目</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">累计学习时长</div>
+      <div class="stat-value" id="stat-hours">0</div>
+      <div class="stat-sub">小时</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">整体完成度</div>
+      <div class="stat-value" id="stat-overall">0%</div>
+      <div class="stat-sub">章节进度</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">
+        <span>今日任务</span>
+        <span class="badge" id="today-badge">0 / 0</span>
+      </div>
+      <ul class="task-list" id="task-list">
+        <li class="empty-state"><p>暂无今日任务，去一建页面标记学习内容吧</p></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">科目整体进度</div>
+      <div class="subject-progress" id="subject-progress"></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">本月学习热力图</div>
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>今日待复盘</span>
+        <span class="badge" id="review-badge">0</span>
+      </div>
+      <div id="review-list">
+        <div class="empty-state"><p>暂无待复盘内容</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">本周刷题统计（含母题练习）</div>
+    <div class="chart-placeholder" id="weekly-chart">加载中...</div>
+  </div>
+</div>
+
+<!-- ===== 一级建造师页面 ===== -->
+<div class="container" id="page-yijian" style="display:none;">
+  <div class="countdown-bar">
+    <div>
+      <div class="label">距离考试</div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <span class="days" id="countdown-days2">--</span>
+        <span class="unit">天</span>
+      </div>
+    </div>
+    <div class="date">2026年9月22日 | 每天进步一点点</div>
+  </div>
+
+  <!-- 四科进度 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">四科进度</div>
+    <div class="subject-progress" id="subject-progress2"></div>
+  </div>
+
+  <!-- 子Tab导航 -->
+  <div class="subtabs">
+    <button class="subtab active" data-subtab="progress">学习进度</button>
+    <button class="subtab" data-subtab="quiz">母题练习</button>
+    <button class="subtab" data-subtab="dictation">默写回顾</button>
+    <button class="subtab" data-subtab="resources">学习资料</button>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="openAddLog()">记录今日学习</button>
+    <button class="btn btn-outline" onclick="openStudyPlan()">学习计划</button>
+    <button class="btn btn-outline" onclick="resetAllData()">重置数据</button>
+    <button class="btn btn-outline" onclick="switchToSubtab('quiz')" style="margin-left:auto;">开始刷题</button>
+  </div>
+
+  <!-- 子Tab: 学习进度 -->
+  <div id="subtab-progress">
+    <div class="card">
+      <div class="card-title">
+        <span>建设工程经济 —— 张涌考点精讲班（43讲）</span>
+        <span style="font-size:12px;color:var(--text-muted);font-weight:400;">点击 ▶ 展开章节，点击讲次切换状态</span>
+      </div>
+      <div id="econ-chapter-list"></div>
+    </div>
+
+    <!-- 其他三科 -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">
+        法规 / 管理 / 实务 —— 章节
+        <span style="font-size:12px;color:var(--text-muted);font-weight:400;">（现有通用章节，上传资料后可细化）</span>
+      </div>
+      <div class="chapter-list" id="other-chapter-list"></div>
+    </div>
+  </div>
+
+  <!-- 子Tab: 母题练习 -->
+  <div id="subtab-quiz" style="display:none;">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">
+        <span>经典母题练习（233网校 400道）</span>
+        <span style="font-size:12px;color:var(--text-muted);font-weight:400;">先思考→查看答案→自评</span>
+      </div>
+      <div class="quiz-stats" id="quiz-stats"></div>
+      <div class="quiz-chapter-select" id="quiz-chapter-select"></div>
+      <div id="quiz-list"></div>
+    </div>
+  </div>
+
+  <!-- 子Tab: 默写回顾 -->
+  <div id="subtab-dictation" style="display:none;">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">
+        <span>默写回顾（填空自测）</span>
+        <span style="font-size:12px;color:var(--text-muted);font-weight:400;">输入答案→核对→记录</span>
+      </div>
+      <div class="quiz-stats" id="dictation-stats"></div>
+      <div class="quiz-chapter-select" id="dictation-chapter-select"></div>
+      <div id="dictation-list"></div>
+    </div>
+  </div>
+
+  <!-- 子Tab: 学习资料 -->
+  <div id="subtab-resources" style="display:none;">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">
+        <span>一建经济 · 完整学习资料包</span>
+      </div>
+      <div id="econ-resources-all"></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+        云端部署版 · 随时随地学习
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div id="toast" class="toast" style="display:none;"></div>
+
+<!-- ===== 记录学习弹窗 ===== -->
+<div class="modal-overlay" id="modal-log" style="display:none;">
+  <div class="modal">
+    <h3>记录今日学习</h3>
+    <label>科目</label>
+    <select id="log-subject">
+      <option value="经济">建设工程经济</option>
+      <option value="法规">建设工程法规</option>
+      <option value="管理">建设工程项目管理</option>
+      <option value="实务">专业工程管理与实务（建筑）</option>
+    </select>
+    <label>章节名称</label>
+    <input type="text" id="log-chapter" placeholder="例如：1.1 利息的计算">
+    <label>学习时长（分钟）</label>
+    <input type="number" id="log-duration" placeholder="分钟数" min="1" value="60">
+    <label>刷题数量（道）</label>
+    <input type="number" id="log-questions" placeholder="题目数" min="0" value="0">
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeModal('modal-log')">取消</button>
+      <button class="btn btn-primary" onclick="saveStudyLog()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 学习计划弹窗 ===== -->
+<div class="modal-overlay" id="modal-plan" style="display:none;">
+  <div class="modal" style="width:560px;">
+    <h3>建设工程经济 · 张涌43讲学习计划</h3>
+    <div style="font-size:13px;color:var(--text-secondary);line-height:1.9;">
+      <p><strong>课程总览：张涌考点精讲班共 43 讲，覆盖教材三篇 20 章</strong></p>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+      <p><strong>第一篇 工程经济（第1-5章）—— 15讲（讲次01-15）</strong></p>
+      <p>第1章 资金时间价值（3讲）→ 第2章 经济效果评价（5讲）→ 第3章 不确定性分析（2讲）→ 第4章 设备更新（4讲）→ 第5章 价值工程（1讲）</p>
+      <p style="color:var(--red);">★ 重点篇：计算题密集，需反复练习母题</p>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+      <p><strong>第二篇 工程财务（第6-12章）—— 11讲（讲次16-26）</strong></p>
+      <p>第6章 财务会计基础（2讲）→ 第7章 费用与成本（2讲）→ 第8章 收入（2讲）→ 第9章 利润与所得税（1讲）→ 第10章 财务分析（2讲）→ 第11章 筹资管理（1讲）→ 第12章 营运资金管理（1讲）</p>
+      <p style="color:var(--orange);">★ 次重点篇：概念多，需四色笔记辅助记忆</p>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+      <p><strong>第三篇 工程计价（第13-20章）—— 17讲（讲次27-43）</strong></p>
+      <p>第13章 建设项目总投资（4讲）→ 第14章 工程定额（2讲）→ 第15章 设计概算（1讲）→ 第16章 清单计价（3讲）→ 第17章 计量与支付（4讲）→ 第18章 总承包计价（1讲）→ 第19章 国际投标（1讲）→ 第20章 数字化（1讲）</p>
+      <p style="color:var(--orange);">★ 篇幅最大：法规性内容多，需配合默写本巩固</p>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+      <p><strong>学习节奏建议（每日2-3小时）：</strong></p>
+      <p>阶段一（Day 1-43）：按讲次顺序学习视频+讲义，每讲约45-60分钟</p>
+      <p>阶段二（Day 44-60）：完成全部母题400道 + 章节题，查漏补缺</p>
+      <p>阶段三（Day 61-80）：默写本自测 + 反复刷错题 + 速记冲刺资料</p>
+      <p>阶段四（Day 81-考前）：历年真题6套 + 金考典每日50道 + 学霸笔记</p>
+      <p style="color:var(--accent);">每日节奏：新讲/刷题/默写 = 60min/60min/30min</p>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeModal('modal-plan')">知道了</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 全局常量定义 ====================
+
+// 文件根目录（云端版，相对路径）
+const BASE_DIR = '.';
+const JINGJIANG_DIR = 'pdf';
+
+// 科目定义
+const SUBJECTS = [
+  { id: '经济', name: '建设工程经济', color: 'econ' },
+  { id: '法规', name: '建设工程法规', color: 'law' },
+  { id: '管理', name: '建设工程项目管理', color: 'mgmt' },
+  { id: '实务', name: '建筑实务', color: 'prac' }
+];
+
+// 章节定义
+const CHAPTERS = {
+  '经济': [
+    '第1章 资金时间价值计算及应用',
+    '第2章 经济效果评价',
+    '第3章 不确定性分析',
+    '第4章 设备更新分析',
+    '第5章 价值工程',
+    '第6章 财务会计基础',
+    '第7章 费用与成本',
+    '第8章 收入',
+    '第9章 利润与所得税费用',
+    '第10章 财务分析',
+    '第11章 筹资管理',
+    '第12章 营运资金管理',
+    '第13章 建设项目总投资构成及计算',
+    '第14章 工程计价依据',
+    '第15章 设计概算与施工图预算',
+    '第16章 工程量清单计价',
+    '第17章 工程计量与支付',
+    '第18章 工程总承包计价',
+    '第19章 国际工程投标报价',
+    '第20章 工程计价数字化与智能化'
+  ],
+  '法规': [
+    '1.1 建设工程法律体系','1.2 建设工程法人制度','1.3 建设工程代理制度',
+    '1.4 建设工程物权制度','1.5 建设工程债权制度','1.6 建设工程知识产权制度',
+    '2.1 施工许可制度','2.2 施工企业从业资格','2.3 建造师注册执业制度',
+    '3.1 建设工程招投标制度','3.2 建设工程承包制度','3.3 建筑市场信用体系',
+    '4.1 建设工程合同制度','4.2 劳动合同及劳动关系'
+  ],
+  '管理': [
+    '1.1 建设工程项目管理','1.2 建设工程项目管理的目标和任务',
+    '1.3 施工组织设计','1.4 建设工程项目规划',
+    '2.1 成本管理','2.2 成本计划','2.3 成本控制',
+    '3.1 进度控制','3.2 进度计划编制','3.3 进度检查与调整',
+    '4.1 质量控制','4.2 质量验收','4.3 质量事故处理'
+  ],
+  '实务': [
+    '1.1 建筑构造与结构体系','1.2 结构设计基本原理',
+    '1.3 常用建筑结构材料','2.1 地基与基础工程施工',
+    '2.2 主体结构工程施工','2.3 防水工程施工',
+    '2.4 装饰装修工程施工','3.1 施工组织设计',
+    '3.2 施工总平面图设计','3.3 施工进度管理',
+    '3.4 施工质量管理','3.5 施工安全管理',
+    '3.6 施工合同管理','4.1 建筑工程相关法规',
+    '4.2 建筑安全生产管理'
+  ]
+};
+
+// 张涌43讲 → 三篇20章（每个讲次一个条目，标题来自实际视频文件名）
+const ECON_SECTIONS = [
+  // 第一篇 工程经济（第1-5章，讲次01-15）
+  { chapter: '第1章 资金时间价值计算及应用', sections: [
+    { name: '第1讲 利息的计算', lect: '第1讲', pdf: '01.第1讲-11利息的计算.pdf' },
+    { name: '第2讲 名义利率与有效利率计算', lect: '第2讲', pdf: '02.第2讲-12名义利率与有效利率计算.pdf' },
+    { name: '第3讲 资金等值计算及应用', lect: '第3讲', pdf: '03.第3讲-13资金等值计算及应用.pdf' }
+  ]},
+  { chapter: '第2章 经济效果评价', sections: [
+    { name: '第4讲 经济效果评价的相关概念及指标体系', lect: '第4讲', pdf: '04.第4讲-21-22经济效果评价的相关概念及指标体系.pdf' },
+    { name: '第5讲 投资回收期分析', lect: '第5讲', pdf: '05.第5讲-22投资回收期分析.pdf' },
+    { name: '第6讲 财务净现值分析', lect: '第6讲', pdf: '06.第6讲-22财务净现值分析.pdf' },
+    { name: '第7讲 财务内部收益率分析', lect: '第7讲', pdf: '07.第7讲-22财务内部收益率分析.pdf' },
+    { name: '第8讲 多方案比选', lect: '第8讲', pdf: '08.第8讲-23多方案比选.pdf' }
+  ]},
+  { chapter: '第3章 不确定性分析', sections: [
+    { name: '第9讲 盈亏平衡分析', lect: '第9讲', pdf: '09.第9讲-31盈亏平衡分析.pdf' },
+    { name: '第10讲 敏感性分析', lect: '第10讲', pdf: '10.第10讲-32敏感性分析.pdf' }
+  ]},
+  { chapter: '第4章 设备更新分析', sections: [
+    { name: '第11讲 设备磨损与补偿', lect: '第11讲', pdf: '11.第11讲-41设备磨损与补偿.pdf' },
+    { name: '第12讲 设备经济寿命确定', lect: '第12讲', pdf: '12.第12讲-42设备经济寿命确定.pdf' },
+    { name: '第13讲 设备更新方案经济分析', lect: '第13讲', pdf: '13.第13讲-43设备更新方案经济分析.pdf' },
+    { name: '第14讲 设备租赁方案经济分析', lect: '第14讲', pdf: '14.第14讲-44设备租赁方案经济分析.pdf' }
+  ]},
+  { chapter: '第5章 价值工程', sections: [
+    { name: '第15讲 价值工程', lect: '第15讲', pdf: '15.第15讲-第5章价值工程.pdf' }
+  ]},
+  // 第二篇 工程财务（第6-12章，讲次16-26）
+  { chapter: '第6章 财务会计基础', sections: [
+    { name: '第16讲 财务会计基础（1）', lect: '第16讲', pdf: '16.第16讲-第6章财务会计基础（1）.pdf' },
+    { name: '第17讲 财务会计基础（2）', lect: '第17讲', pdf: '17.第17讲-第6章财务会计基础（2）.pdf' }
+  ]},
+  { chapter: '第7章 费用与成本', sections: [
+    { name: '第18讲 费用与成本的关系', lect: '第18讲', pdf: '18.第18讲-71费用与成本的关系.pdf' },
+    { name: '第19讲 费用与成本的核算', lect: '第19讲', pdf: '19.第19讲-72-74费用与成本的核算.pdf' }
+  ]},
+  { chapter: '第8章 收入', sections: [
+    { name: '第20讲 收入的分类、确认及计量', lect: '第20讲', pdf: '20.第20讲-81收入的分类、确认及计量.pdf' },
+    { name: '第21讲 建造合同收入', lect: '第21讲', pdf: '21.第21讲-82建造合同收入.pdf' }
+  ]},
+  { chapter: '第9章 利润与所得税费用', sections: [
+    { name: '第22讲 利润与所得税费用', lect: '第22讲', pdf: '22.第22讲-第9章利润与所得税费用.pdf' }
+  ]},
+  { chapter: '第10章 财务分析', sections: [
+    { name: '第23讲 财务报告构成及列报基本要求', lect: '第23讲', pdf: '23.第23讲-101财务报告构成及列报基本要求.pdf' },
+    { name: '第24讲 财务分析方法', lect: '第24讲', pdf: '24.第24讲-102财务分析方法.pdf' }
+  ]},
+  { chapter: '第11章 筹资管理', sections: [
+    { name: '第25讲 筹资管理', lect: '第25讲', pdf: '25.第25讲-第11章筹资管理.pdf' }
+  ]},
+  { chapter: '第12章 营运资金管理', sections: [
+    { name: '第26讲 营运资金管理', lect: '第26讲', pdf: '26.第26讲-第12章营运资金管理.pdf' }
+  ]},
+  // 第三篇 工程计价（第13-20章，讲次27-43）
+  { chapter: '第13章 建设项目总投资构成及计算', sections: [
+    { name: '第27讲 建设项目总投资', lect: '第27讲', pdf: '27.第27讲-131建设项目总投资.pdf' },
+    { name: '第28讲 设备及工器具购置费构成及计算', lect: '第28讲', pdf: '28.第28讲-132设备及工器具购置费构成及计算.pdf' },
+    { name: '第29讲 建筑安装工程费构成及计算', lect: '第29讲', pdf: '29.第29讲-133建筑安装工程费构成及计算.pdf' },
+    { name: '第30讲 工程建设其他费、预备费、增值税、建设期利息和流动资金', lect: '第30讲', pdf: '30.第30讲-134-137工程建设其他费、预备费、增值税、建设期利息和流动资金.pdf' }
+  ]},
+  { chapter: '第14章 工程计价依据', sections: [
+    { name: '第31讲 工程定额体系及人材机定额的确定', lect: '第31讲', pdf: '31.第31讲-141-143工程定额体系及人材机定额的确定.pdf' },
+    { name: '第32讲 预算、概算定额与概算指标及工程造价指标与指数', lect: '第32讲', pdf: '32.第32讲-144-145预算、概算定额与概算指标及工程造价指标与指数.pdf' }
+  ]},
+  { chapter: '第15章 设计概算与施工图预算', sections: [
+    { name: '第33讲 设计概算与施工图预算', lect: '第33讲', pdf: '33.第33讲-第15章设计概算与施工图预算.pdf' }
+  ]},
+  { chapter: '第16章 工程量清单计价', sections: [
+    { name: '第34讲 工程量清单计价原理', lect: '第34讲', pdf: '34.第34讲-161工程量清单计价原理.pdf' },
+    { name: '第35讲 工程量清单编制', lect: '第35讲', pdf: '35.第35讲-162工程量清单编制.pdf' },
+    { name: '第36讲 最高投标限价和投标报价编制', lect: '第36讲', pdf: '36.第36讲-163-164最高投标限价和投标报价编制.pdf' }
+  ]},
+  { chapter: '第17章 工程计量与支付', sections: [
+    { name: '第37讲 工程计量', lect: '第37讲', pdf: '37.第37讲-171工程计量.pdf' },
+    { name: '第38讲 合同价款调整', lect: '第38讲', pdf: '38.第38讲-172合同价款调整.pdf' },
+    { name: '第39讲 工程变更价款确定、工程索赔', lect: '第39讲', pdf: '39.第39讲-173-174工程变更价款确定、工程索赔.pdf' },
+    { name: '第40讲 合同价款期中支付与质量保证金', lect: '第40讲', pdf: '40.第40讲-175-177合同价款期中支付与质量保证金.pdf' }
+  ]},
+  { chapter: '第18章 工程总承包计价', sections: [
+    { name: '第41讲 工程总承包计价', lect: '第41讲', pdf: '41.第41讲-第18章工程总承包计价.pdf' }
+  ]},
+  { chapter: '第19章 国际工程投标报价', sections: [
+    { name: '第42讲 国际工程投标报价', lect: '第42讲', pdf: '42.第42讲-第19章国际工程投标报价.pdf' }
+  ]},
+  { chapter: '第20章 工程计价数字化与智能化', sections: [
+    { name: '第43讲 工程计价数字化与智能化', lect: '第43讲', pdf: '43.第43讲-第20章工程计价数字化与智能化.pdf' }
+  ]}
+];
+
+// 分篇信息
+const ECON_PARTS = [
+  { name: '第一篇 工程经济', chapters: ['第1章','第2章','第3章','第4章','第5章'], lectures: 15, range: '讲次01-15' },
+  { name: '第二篇 工程财务', chapters: ['第6章','第7章','第8章','第9章','第10章','第11章','第12章'], lectures: 11, range: '讲次16-26' },
+  { name: '第三篇 工程计价', chapters: ['第13章','第14章','第15章','第16章','第17章','第18章','第19章','第20章'], lectures: 17, range: '讲次27-43' }
+];
+
+// ==================== 母题题库（每章3道示例，共60道） ====================
+const QUIZ_ITEMS = [
+  // 第1章
+  { chapter: '第1章 资金时间价值计算及应用', question: '某人期望5年内每年末从银行提款10000元，年利率为10%，按复利计息，则期初应存入银行多少元？', options: ['A. 37910元', 'B. 41700元', 'C. 43550元', 'D. 50000元'], answer: 'A', analysis: '已知A求P，P=A(P/A,10%,5)=10000×3.791=37910元。这是典型的年金现值计算。' },
+  { chapter: '第1章 资金时间价值计算及应用', question: '某企业从银行贷款200万元，年利率为6%，按季计息，则年有效利率为多少？', options: ['A. 6.00%', 'B. 6.09%', 'C. 6.14%', 'D. 6.17%'], answer: 'C', analysis: '有效利率i=(1+r/m)^m-1=(1+6%/4)^4-1=6.136%≈6.14%。计息次数越多，有效利率越高。' },
+  { chapter: '第1章 资金时间价值计算及应用', question: '关于资金时间价值的说法，正确的是？', options: ['A. 资金周转速度越快，时间价值越小', 'B. 在总资金一定的情况下，前期投入越多，资金正效益越大', 'C. 资金时间价值是资金在生产和流通过程中随时间推移产生的增值', 'D. 利率是衡量资金时间价值的绝对尺度'], answer: 'C', analysis: '资金时间价值的本质是资金在生产和流通中随时间产生的增值。利率是相对尺度，利息额是绝对尺度。' },
+
+  // 第2章
+  { chapter: '第2章 经济效果评价', question: '某技术方案各年的净现金流量如下表所示，则该方案的静态投资回收期为多少年？\n（现金流：第0年-200万，第1年60万，第2年60万，第3年60万，第4年60万，第5年60万）', options: ['A. 3.33年', 'B. 3.67年', 'C. 4.00年', 'D. 4.33年'], answer: 'A', analysis: '累计净现金流量：-200,-140,-80,-20,40,100。第4年出现正值，回收期=4-1+20/60=3.33年。' },
+  { chapter: '第2章 经济效果评价', question: '财务净现值（FNPV）的判别准则是？', options: ['A. FNPV≥0时方案可行', 'B. FNPV>1时方案可行', 'C. FNPV<0时方案可行', 'D. FNPV越大方案越不可行'], answer: 'A', analysis: 'FNPV≥0说明方案达到或超过基准收益率要求的盈利水平，方案在经济上可行。' },
+  { chapter: '第2章 经济效果评价', question: '关于财务内部收益率（FIRR）的说法，错误的是？', options: ['A. FIRR是使FNPV=0的折现率', 'B. FIRR≥基准收益率时方案可行', 'C. FIRR的大小与外部参数无关', 'D. FIRR可以直接用于多方案比选排序'], answer: 'D', analysis: 'FIRR不能直接用于互斥方案比选排序，应用差额投资内部收益率法。FIRR仅取决于方案本身的现金流量。' },
+
+  // 第3章
+  { chapter: '第3章 不确定性分析', question: '某方案设计年产量12万吨，每吨售价510元，每吨可变成本250元，年固定成本1500万元。则该方案的盈亏平衡点产量为多少？', options: ['A. 4.81万吨', 'B. 5.77万吨', 'C. 6.25万吨', 'D. 6.67万吨'], answer: 'B', analysis: 'BEP(Q)=CF/(P-CV)=1500/(510-250)=1500/260=5.77万吨。盈亏平衡点越低，方案抗风险能力越强。' },
+  { chapter: '第3章 不确定性分析', question: '在单因素敏感性分析中，通常用来衡量敏感程度的指标是？', options: ['A. 盈亏平衡点', 'B. 敏感性系数', 'C. 内部收益率', 'D. 净现值'], answer: 'B', analysis: '敏感性系数SAF=(ΔA/A)/(ΔF/F)，即评价指标变化率与不确定因素变化率之比，绝对值越大越敏感。' },
+  { chapter: '第3章 不确定性分析', question: '关于盈亏平衡分析的说法，正确的是？', options: ['A. 盈亏平衡点越高，抗风险能力越强', 'B. 盈亏平衡分析包括线性与非线性分析', 'C. 盈亏平衡分析能判断方案风险的大小和根源', 'D. 盈亏平衡点只能用产量表示'], answer: 'B', analysis: '盈亏平衡分析包括线性与非线性两种。盈亏平衡点越低抗风险越强，可用产量、售价、产能利用率等表示。' },
+
+  // 第4章
+  { chapter: '第4章 设备更新分析', question: '设备磨损分为有形磨损和无形磨损，关于两类磨损的说法，正确的是？', options: ['A. 第一种有形磨损是设备在闲置中受自然力作用产生', 'B. 第二种无形磨损是由于技术进步出现更先进设备', 'C. 第一种无形磨损是设备使用中实体磨损', 'D. 第二种有形磨损是设备在闲置中受自然力作用产生'], answer: 'D', analysis: '第一种有形磨损=使用中磨损；第二种有形磨损=闲置中自然力作用。第一种无形磨损=设备贬值（再生产价值降低）；第二种无形磨损=出现更先进设备。' },
+  { chapter: '第4章 设备更新分析', question: '某设备目前的账面价值为30000元，预计还可使用5年，每年运行成本12000元，若现在出售可得15000元。则该设备的经济寿命由什么决定？', options: ['A. 平均年资产消耗成本最低的年限', 'B. 平均年运行成本最低的年限', 'C. 年平均使用成本最低的年限', 'D. 设备残值最大的年限'], answer: 'C', analysis: '经济寿命是设备从开始使用到年平均使用成本最低的年限。年平均使用成本=年均资产消耗成本+年均运行成本。' },
+  { chapter: '第4章 设备更新分析', question: '设备租赁与购买的比选分析中，对于承租人来说，设备租赁的缺点是？', options: ['A. 不能获得设备所有权', 'B. 资金短缺时无法使用先进设备', 'C. 租赁费用通常低于折旧', 'D. 不能避免技术落后风险'], answer: 'A', analysis: '租赁的主要缺点是承租人只有使用权没有所有权，且长期租赁总费用可能高于购买。优点是可避免设备陈旧过时的风险。' },
+
+  // 第5章
+  { chapter: '第5章 价值工程', question: '价值工程中的"价值"是指？', options: ['A. 产品的使用价值', 'B. 产品的交换价值', 'C. 产品功能与获得该功能所花费用的比值', 'D. 产品的市场价格'], answer: 'C', analysis: '价值工程中V=F/C，即功能与成本的比值。核心是以最低的寿命周期成本可靠地实现必要功能。' },
+  { chapter: '第5章 价值工程', question: '价值工程的工作步骤中，第一步是？', options: ['A. 功能分析', 'B. 方案创新', 'C. 对象选择', 'D. 方案评价'], answer: 'C', analysis: '价值工程工作程序：对象选择→情报收集→功能分析→方案创新→方案评价→方案实施。对象选择是起点。' },
+  { chapter: '第5章 价值工程', question: '在价值工程中，若某功能评价值F=100，实际成本C=120，则价值系数V和应采取的措施是？', options: ['A. V=0.83，应降低成本', 'B. V=1.2，应增加功能', 'C. V=0.83，应增加成本', 'D. V=1.2，应降低成本'], answer: 'A', analysis: 'V=F/C=100/120=0.83<1，说明实现功能的实际成本偏高，应采取措施降低成本。' },
+
+  // 第6章
+  { chapter: '第6章 财务会计基础', question: '企业在对会计要素进行计量时，一般应当采用的计量属性是？', options: ['A. 历史成本', 'B. 重置成本', 'C. 公允价值', 'D. 现值'], answer: 'A', analysis: '历史成本是会计计量的基本属性，也是我国企业会计准则规定的一般采用属性。其他属性在特定条件下使用。' },
+  { chapter: '第6章 财务会计基础', question: '下列各会计要素中，属于静态会计要素的是？', options: ['A. 收入', 'B. 费用', 'C. 资产', 'D. 利润'], answer: 'C', analysis: '资产、负债、所有者权益是静态要素（资产负债表要素）；收入、费用、利润是动态要素（利润表要素）。' },
+  { chapter: '第6章 财务会计基础', question: '"资产=负债+所有者权益"反映的是？', options: ['A. 企业的经营成果', 'B. 企业的财务状况', 'C. 企业的现金流量', 'D. 企业所有者权益变动'], answer: 'B', analysis: '会计等式"资产=负债+所有者权益"反映企业在特定时点的财务状况，是资产负债表的编制基础。' },
+
+  // 第7章
+  { chapter: '第7章 费用与成本', question: '施工企业为组织和管理施工生产活动所发生的费用，属于？', options: ['A. 直接费用', 'B. 间接费用', 'C. 期间费用', 'D. 营业外支出'], answer: 'B', analysis: '施工企业的间接费用包括现场管理费等组织管理施工的费用。直接费用可直接计入成本对象，期间费用计入当期损益。' },
+  { chapter: '第7章 费用与成本', question: '下列费用中，应计入施工企业期间费用的是？', options: ['A. 材料费', 'B. 管理费用', 'C. 人工费', 'D. 机械使用费'], answer: 'B', analysis: '期间费用包括管理费用、销售费用和财务费用，直接计入当期损益。材料费、人工费、机械费属于直接费用或间接费用。' },
+  { chapter: '第7章 费用与成本', question: '工程成本核算中，能直接分清受益对象的费用应？', options: ['A. 计入期间费用', 'B. 直接计入成本核算对象', 'C. 按比例分配', 'D. 计入管理费用'], answer: 'B', analysis: '工程成本核算应遵循直接费用直接计入、间接费用分配计入的原则。能分清受益对象的直接计入对应成本对象。' },
+
+  // 第8章
+  { chapter: '第8章 收入', question: '施工企业按完工百分比法确认收入时，完工进度的确定方法不包括？', options: ['A. 累计实际发生的合同成本占合同预计总成本的比例', 'B. 已经完成的合同工作量占合同预计总工作量的比例', 'C. 实际测定的完工进度', 'D. 累计实际收到的工程款占合同总价的比例'], answer: 'D', analysis: '完工百分比确定方法有三种：成本比例法、工作量比例法、实际测定法。按收款进度确认不符合权责发生制原则。' },
+  { chapter: '第8章 收入', question: '建造合同的结果能够可靠估计的，企业应在资产负债表日按什么确认合同收入？', options: ['A. 实际收到的款项', 'B. 完工百分比法', 'C. 合同总金额', 'D. 已开票金额'], answer: 'B', analysis: '建造合同结果能可靠估计的，应采用完工百分比法在资产负债表日确认合同收入和费用。' },
+  { chapter: '第8章 收入', question: '某建造合同总价1000万元，预计总成本800万元。第一年末累计发生成本320万元，则第一年应确认的合同收入为？', options: ['A. 320万元', 'B. 400万元', 'C. 500万元', 'D. 800万元'], answer: 'B', analysis: '完工百分比=320/800=40%，应确认收入=1000×40%=400万元。按完工百分比法确认，与实际收款无关。' },
+
+  // 第9章
+  { chapter: '第9章 利润与所得税费用', question: '企业的营业利润计算公式为？', options: ['A. 营业利润=营业收入-营业成本', 'B. 营业利润=营业收入-营业成本-税金及附加-期间费用+投资收益', 'C. 营业利润=营业收入-营业成本-税金及附加', 'D. 营业利润=利润总额-所得税费用'], answer: 'B', analysis: '营业利润=营业收入-营业成本-税金及附加-销售费用-管理费用-财务费用+投资收益（-投资损失）。' },
+  { chapter: '第9章 利润与所得税费用', question: '应纳税所得额与会计利润的关系，正确的表述是？', options: ['A. 应纳税所得额=会计利润', 'B. 应纳税所得额=会计利润±纳税调整项目', 'C. 应纳税所得额=会计利润-可抵扣暂时性差异', 'D. 应纳税所得额=会计利润×所得税税率'], answer: 'B', analysis: '应纳税所得额=会计利润+纳税调增项目-纳税调减项目。由于会计准则与税法规定存在差异，需要进行纳税调整。' },
+  { chapter: '第9章 利润与所得税费用', question: '企业的净利润等于？', options: ['A. 营业利润', 'B. 利润总额', 'C. 利润总额-所得税费用', 'D. 营业利润+营业外收入'], answer: 'C', analysis: '净利润=利润总额-所得税费用。利润总额=营业利润+营业外收入-营业外支出。' },
+
+  // 第10章
+  { chapter: '第10章 财务分析', question: '反映企业短期偿债能力的指标是？', options: ['A. 资产负债率', 'B. 流动比率', 'C. 净资产收益率', 'D. 总资产周转率'], answer: 'B', analysis: '流动比率=流动资产/流动负债，反映短期偿债能力。资产负债率反映长期偿债能力，净资产收益率反映盈利能力。' },
+  { chapter: '第10章 财务分析', question: '某企业流动资产300万，其中存货100万，流动负债150万，则速动比率为？', options: ['A. 1.33', 'B. 2.00', 'C. 0.67', 'D. 1.00'], answer: 'A', analysis: '速动比率=(流动资产-存货)/流动负债=(300-100)/150=1.33。速动比率排除变现能力较差的存货，更严格反映短期偿债能力。' },
+  { chapter: '第10章 财务分析', question: '财务分析的基本方法中，将若干期财务数据排列比较的是？', options: ['A. 比率分析法', 'B. 趋势分析法', 'C. 因素分析法', 'D. 综合分析法'], answer: 'B', analysis: '趋势分析法是将连续若干期的财务数据排列比较，分析其增减变化趋势。比率分析法是计算财务比率，因素分析法是分析各因素影响程度。' },
+
+  // 第11章
+  { chapter: '第11章 筹资管理', question: '企业向银行借款时，银行要求的补偿性余额会？', options: ['A. 降低实际利率', 'B. 提高实际利率', 'C. 不影响实际利率', 'D. 取决于借款金额'], answer: 'B', analysis: '补偿性余额是企业借款时银行要求保留在账户中的最低余额，降低了实际可用资金，从而提高了实际利率。' },
+  { chapter: '第11章 筹资管理', question: '企业筹资方式中，属于权益筹资的是？', options: ['A. 发行债券', 'B. 银行借款', 'C. 发行股票', 'D. 融资租赁'], answer: 'C', analysis: '权益筹资包括吸收直接投资、发行股票、留存收益等。发行债券、银行借款、融资租赁属于债务筹资。' },
+  { chapter: '第11章 筹资管理', question: '某企业长期借款1000万，年利率8%，所得税率25%，则该借款的资金成本为？', options: ['A. 8%', 'B. 6%', 'C. 2%', 'D. 10%'], answer: 'B', analysis: '长期借款资金成本=年利率×(1-所得税率)=8%×(1-25%)=6%。利息可在税前扣除，有抵税效应。' },
+
+  // 第12章
+  { chapter: '第12章 营运资金管理', question: '企业持有现金的动机不包括？', options: ['A. 交易性动机', 'B. 预防性动机', 'C. 投机性动机', 'D. 投资性动机'], answer: 'D', analysis: '持有现金的三大动机：交易性（日常支付）、预防性（应对意外）、投机性（抓住机会）。投资性不属于现金持有动机。' },
+  { chapter: '第12章 营运资金管理', question: '企业应收账款管理的目标是？', options: ['A. 尽可能减少应收账款', 'B. 在扩大销售与增加成本间取得平衡', 'C. 完全消除坏账风险', 'D. 最大化赊销额度'], answer: 'B', analysis: '应收账款管理的目标是在因赊销扩大销售增加的收益与应收账款增加的成本（机会成本、管理成本、坏账成本）之间取得平衡。' },
+  { chapter: '第12章 营运资金管理', question: '经济订货批量（EOQ）模型的基本假设不包括？', options: ['A. 存货全年需要量已知', 'B. 存货单价不变', 'C. 订货提前期已知', 'D. 允许缺货'], answer: 'D', analysis: 'EOQ模型假设不允许缺货。基本假设还包括：需求量已知且稳定、订货提前期已知、一次到货、单价不变等。' },
+
+  // 第13章
+  { chapter: '第13章 建设项目总投资构成及计算', question: '下列费用中，属于建筑安装工程费中规费的是？', options: ['A. 材料费', 'B. 施工机具使用费', 'C. 社会保险费', 'D. 企业管理费'], answer: 'C', analysis: '规费包括五险一金：养老保险、医疗保险、失业保险、工伤保险、生育保险和住房公积金。按费用构成要素划分属于建安费中的规费。' },
+  { chapter: '第13章 建设项目总投资构成及计算', question: '某进口设备到岸价100万美元，银行财务费费率0.5%，外贸手续费费率1.5%，关税税率10%，增值税税率13%，汇率为1美元=7.1元。该进口设备的增值税为多少？', options: ['A. 92.3万元', 'B. 101.5万元', 'C. 110.8万元', 'D. 98.7万元'], answer: 'B', analysis: '到岸价=100×7.1=710万元，关税=710×10%=71万元，增值税=(710+71)×13%=101.53万元。增值税的计税基础是到岸价+关税。' },
+  { chapter: '第13章 建设项目总投资构成及计算', question: '建设项目总投资中，不属于工程建设其他费的是？', options: ['A. 土地使用费', 'B. 建设管理费', 'C. 研究试验费', 'D. 建筑安装工程费'], answer: 'D', analysis: '工程建设其他费包括土地使用费、建设管理费、研究试验费、勘察设计费等。建筑安装工程费与设备购置费、其他费是并列关系。' },
+
+  // 第14章
+  { chapter: '第14章 工程计价依据', question: '按主编单位和执行范围划分，工程定额中最基本的是？', options: ['A. 全国统一定额', 'B. 行业定额', 'C. 企业定额', 'D. 施工定额'], answer: 'D', analysis: '施工定额是工程定额体系中最基本的定额，是编制预算定额的基础。按定额编制程序和用途分：施工→预算→概算→估算指标。' },
+  { chapter: '第14章 工程计价依据', question: '人工定额中，工人必须消耗的时间不包括？', options: ['A. 有效工作时间', 'B. 休息时间', 'C. 不可避免的中断时间', 'D. 多余和偶然工作时间'], answer: 'D', analysis: '必须消耗时间=有效工作时间+休息时间+不可避免中断时间。多余和偶然工作时间属于损失时间，不计入定额。' },
+  { chapter: '第14章 工程计价依据', question: '材料消耗定额中，材料净用量与材料损耗量的关系是？', options: ['A. 材料消耗量=净用量+损耗量', 'B. 材料消耗量=净用量-损耗量', 'C. 材料消耗量=净用量×损耗率', 'D. 材料消耗量=损耗量/净用量'], answer: 'A', analysis: '材料消耗量=净用量+损耗量=净用量×(1+损耗率)。损耗量包括运输损耗、施工损耗和保管损耗。' },
+
+  // 第15章
+  { chapter: '第15章 设计概算与施工图预算', question: '设计概算的编制依据不包括？', options: ['A. 批准的可行性研究报告', 'B. 设计图纸', 'C. 施工组织设计', 'D. 概算定额和指标'], answer: 'C', analysis: '设计概算阶段尚未编制施工组织设计。概算依据包括：可行性研究、设计图纸、概算定额和指标、费用定额、设备材料价格等。' },
+  { chapter: '第15章 设计概算与施工图预算', question: '施工图预算的编制方法中，工程量清单计价法适用于？', options: ['A. 实行招标的工程', 'B. 所有工程', 'C. 仅适用于政府投资工程', 'D. 仅适用于小型工程'], answer: 'A', analysis: '工程量清单计价法适用于实行工程量清单招标的工程。定额计价法适用于非招标或小型工程。' },
+  { chapter: '第15章 设计概算与施工图预算', question: '当初步设计深度不够，不能准确计算工程量时，编制单位工程概算宜采用？', options: ['A. 概算定额法', 'B. 概算指标法', 'C. 类似工程预算法', 'D. 预算定额法'], answer: 'B', analysis: '概算指标法适用于初步设计深度不够、不能准确计算工程量但工程设计采用技术较成熟且有类似概算指标的情况。' },
+
+  // 第16章
+  { chapter: '第16章 工程量清单计价', question: '工程量清单应由谁编制？', options: ['A. 承包人的造价人员', 'B. 招标人或其委托的工程造价咨询人', 'C. 监理单位', 'D. 建设主管部门'], answer: 'B', analysis: '工程量清单应由具有编制能力的招标人或其委托的具有相应资质的工程造价咨询人编制，是招标文件的组成部分。' },
+  { chapter: '第16章 工程量清单计价', question: '工程量清单中的项目编码共多少位？', options: ['A. 9位', 'B. 12位', 'C. 15位', 'D. 18位'], answer: 'B', analysis: '分部分项工程量清单项目编码为12位。前9位为全国统一编码（01-04级），后3位为清单项目名称顺序码。' },
+  { chapter: '第16章 工程量清单计价', question: '投标人在进行工程量清单投标报价时，对于分部分项工程量清单中的工程数量？', options: ['A. 可以自行修改', 'B. 必须按招标文件中的数量填报', 'C. 可以按实际调整', 'D. 可以协商修改'], answer: 'B', analysis: '投标人必须按招标文件中的工程量填报单价，不能修改工程量。量由招标人负责，价由投标人负责，量的风险由招标人承担。' },
+
+  // 第17章
+  { chapter: '第17章 工程计量与支付', question: '关于工程计量的说法，正确的是？', options: ['A. 工程计量由承包人单方面确定', 'B. 已完工程量必须经发包人核实确认', 'C. 工程计量只能用图纸计算', 'D. 监理人不能参与计量'], answer: 'B', analysis: '已完工程量须经发承包双方核实确认。承包人报量→监理人核实→发包人确认。计量方式包括实地测量、图纸计算、现场记录等。' },
+  { chapter: '第17章 工程计量与支付', question: '因法律法规变化导致合同价款调整的，调整的时间节点是？', options: ['A. 投标截止日前28天', 'B. 合同签订日', 'C. 基准日后', 'D. 开工日'], answer: 'C', analysis: '基准日后因法律法规变化导致工程价款增加/减少的，应调整合同价款。基准日是投标截止日前28天。' },
+  { chapter: '第17章 工程计量与支付', question: '工程索赔按目的分类，不包括？', options: ['A. 工期索赔', 'B. 费用索赔', 'C. 总索赔', 'D. 利润索赔'], answer: 'D', analysis: '索赔按目的分类为工期索赔和费用索赔。利润通常在费用索赔中作为一部分。按处理方式分为单项索赔和总索赔。' },
+
+  // 第18章
+  { chapter: '第18章 工程总承包计价', question: '工程总承包项目宜采用的合同计价方式是？', options: ['A. 单价合同', 'B. 总价合同', 'C. 成本加酬金合同', 'D. 可调价合同'], answer: 'B', analysis: '工程总承包项目宜采用总价合同。除发包人要求变更外，合同总价一般不予调整。有利于发包人控制投资、承包人提高效率。' },
+  { chapter: '第18章 工程总承包计价', question: '工程总承包费用中，不包括？', options: ['A. 勘察设计费', 'B. 建筑安装工程费', 'C. 设备购置费', 'D. 土地使用费'], answer: 'D', analysis: '工程总承包费用包括勘察设计费、建安费、设备购置费、总承包管理费等。土地使用费属于工程建设其他费，通常由发包人承担。' },
+  { chapter: '第18章 工程总承包计价', question: '工程总承包模式下，发包人要求变化引起的合同价格调整，由谁提出？', options: ['A. 仅发包人', 'B. 仅承包人', 'C. 发包人或承包人均可', 'D. 监理人'], answer: 'C', analysis: '发包人要求变化影响合同价格的，双方均可在规定时间内提出调整要求。调整应包括费用和工期两个方面。' },
+
+  // 第19章
+  { chapter: '第19章 国际工程投标报价', question: '国际工程投标报价中，开办费通常不包括？', options: ['A. 施工用水电费', 'B. 临时设施费', 'C. 施工机械费', 'D. 现场管理费'], answer: 'D', analysis: '开办费包括施工用水电、临时设施、施工机械、脚手架、工程师办公生活设施等。现场管理费通常列入间接费。' },
+  { chapter: '第19章 国际工程投标报价', question: '国际工程投标报价中，确定材料、半成品和设备的预算价格时，应包含？', options: ['A. 仅出厂价', 'B. 出厂价+运杂费+运输损耗+采购保管费', 'C. 仅出厂价+运杂费', 'D. 出厂价+利润'], answer: 'B', analysis: '材料预算价格=出厂价+运杂费+运输损耗+采购保管费。国际工程中还需考虑关税、港口费、海关手续费等。' },
+  { chapter: '第19章 国际工程投标报价', question: '国际工程投标报价决策中，"不平衡报价法"是指？', options: ['A. 总价不变，调整各分项报价的高低', 'B. 先以低价中标再索赔', 'C. 高价策略', 'D. 低价策略'], answer: 'A', analysis: '不平衡报价是在总价不变的前提下，调高早期收款项目报价、调低后期收款项目报价，以改善现金流。属于投标报价技巧。' },
+
+  // 第20章
+  { chapter: '第20章 工程计价数字化与智能化', question: 'BIM技术在工程计价中的应用，最核心的优势是？', options: ['A. 减少人工', 'B. 自动算量+成本数据关联', 'C. 图纸美观', 'D. 不需要专业人员'], answer: 'B', analysis: 'BIM的核心优势是可自动计算工程量并将成本数据与模型关联，实现设计与计价一体化，减少重复工作和人为错误。' },
+  { chapter: '第20章 工程计价数字化与智能化', question: '人工智能在工程计价中的主要应用方向是？', options: ['A. 完全替代造价工程师', 'B. 辅助编制概预算和投资估算', 'C. 管理施工现场', 'D. 绘制设计图纸'], answer: 'B', analysis: 'AI在计价中主要应用于：辅助编制投资估算、概预算、最高投标限价等，通过机器学习历史数据提高估算精度，但不能完全替代人工。' },
+  { chapter: '第20章 工程计价数字化与智能化', question: '大数据在工程计价中的主要作用是？', options: ['A. 替代所有传统计价方法', 'B. 为造价指标和指数编制提供数据支撑', 'C. 仅用于政府项目管理', 'D. 消除所有计价差异'], answer: 'B', analysis: '大数据为工程造价指标、指数的编制和动态管理提供数据支撑，有助于提高计价依据的科学性和合理性。' }
+];
+
+// ==================== 默写填空项（每章4个，共80个） ====================
+const DICTATION_ITEMS = [
+  // 第1章
+  { chapter: '第1章 资金时间价值计算及应用', text: '资金时间价值是资金在____和流通领域随时间推移而发生的增值。', answer: '生产' },
+  { chapter: '第1章 资金时间价值计算及应用', text: '名义利率r，一年计息m次，有效利率i的计算公式为：i = ____', answer: '(1+r/m)^m-1' },
+  { chapter: '第1章 资金时间价值计算及应用', text: '等值计算中，将未来某一时点资金换算到现在的过程称为____。', answer: '折现（贴现）' },
+  { chapter: '第1章 资金时间价值计算及应用', text: '年利率6%，按季计息，则年有效利率约为____%。', answer: '6.14' },
+
+  // 第2章
+  { chapter: '第2章 经济效果评价', text: '静态投资回收期是从____起算，累计净现金流量等于0的年份。', answer: '投资开始年' },
+  { chapter: '第2章 经济效果评价', text: '财务净现值FNPV≥0时，方案在经济上____。', answer: '可行' },
+  { chapter: '第2章 经济效果评价', text: '财务内部收益率FIRR是使FNPV等于____时的折现率。', answer: '零（0）' },
+  { chapter: '第2章 经济效果评价', text: '多个互斥方案比选时，应使用____法，而非直接比较FIRR。', answer: '差额投资内部收益率' },
+
+  // 第3章
+  { chapter: '第3章 不确定性分析', text: '盈亏平衡点越低，方案的抗风险能力越____。', answer: '强' },
+  { chapter: '第3章 不确定性分析', text: '盈亏平衡产量公式：BEP(Q)=固定成本/(____-单位可变成本)', answer: '单价' },
+  { chapter: '第3章 不确定性分析', text: '敏感性系数SAF的绝对值越大，说明该因素越____。', answer: '敏感' },
+  { chapter: '第3章 不确定性分析', text: '敏感性分析中，通常选择____、投资额、经营成本等作为不确定因素。', answer: '产品价格' },
+
+  // 第4章
+  { chapter: '第4章 设备更新分析', text: '设备磨损分为____磨损和无形磨损两大类。', answer: '有形' },
+  { chapter: '第4章 设备更新分析', text: '设备经济寿命是设备从开始使用到____最低的年限。', answer: '年平均使用成本' },
+  { chapter: '第4章 设备更新分析', text: '第二种无形磨损是由于出现____设备导致原设备相对贬值。', answer: '更先进的新型' },
+  { chapter: '第4章 设备更新分析', text: '设备租赁的缺点是承租人只有____权，不能处置设备。', answer: '使用' },
+
+  // 第5章
+  { chapter: '第5章 价值工程', text: '价值工程中，价值V = 功能F / ____。', answer: '成本C' },
+  { chapter: '第5章 价值工程', text: '价值工程的核心是对产品进行____分析。', answer: '功能' },
+  { chapter: '第5章 价值工程', text: '价值工程的工作步骤第一步是____选择。', answer: '对象' },
+  { chapter: '第5章 价值工程', text: '当V<1时，说明成本偏高，应采取措施____成本。', answer: '降低' },
+
+  // 第6章
+  { chapter: '第6章 财务会计基础', text: '会计要素计量一般应采用的属性是____成本。', answer: '历史' },
+  { chapter: '第6章 财务会计基础', text: '静态会计等式：资产 = 负债 + ____。', answer: '所有者权益' },
+  { chapter: '第6章 财务会计基础', text: '会计基本假设包括：会计主体、持续经营、____、货币计量。', answer: '会计分期' },
+  { chapter: '第6章 财务会计基础', text: '收入、费用、利润属于____会计要素。', answer: '动态' },
+
+  // 第7章
+  { chapter: '第7章 费用与成本', text: '施工企业为组织和管理施工生产发生的费用属于____费用。', answer: '间接' },
+  { chapter: '第7章 费用与成本', text: '期间费用包括管理费用、____费用和财务费用。', answer: '销售' },
+  { chapter: '第7章 费用与成本', text: '能分清受益对象的费用应____计入成本核算对象。', answer: '直接' },
+  { chapter: '第7章 费用与成本', text: '费用按经济内容分类，分为____、材料费、施工机具使用费等。', answer: '人工费' },
+
+  // 第8章
+  { chapter: '第8章 收入', text: '建造合同结果能可靠估计的，应采用____法确认收入。', answer: '完工百分比' },
+  { chapter: '第8章 收入', text: '完工百分比=累计发生成本/____总成本。', answer: '预计' },
+  { chapter: '第8章 收入', text: '收入确认应遵循____发生制原则。', answer: '权责' },
+  { chapter: '第8章 收入', text: '合同预计总成本超过合同总收入的，预计损失应确认为____。', answer: '当期费用' },
+
+  // 第9章
+  { chapter: '第9章 利润与所得税费用', text: '营业利润=营业收入-营业成本-税金及附加-____+投资收益。', answer: '期间费用' },
+  { chapter: '第9章 利润与所得税费用', text: '利润总额=营业利润+营业外____-营业外支出。', answer: '收入' },
+  { chapter: '第9章 利润与所得税费用', text: '净利润=利润总额-____费用。', answer: '所得税' },
+  { chapter: '第9章 利润与所得税费用', text: '应纳税所得额=会计利润____纳税调整项目。', answer: '±（加减）' },
+
+  // 第10章
+  { chapter: '第10章 财务分析', text: '流动比率=流动资产/____负债，反映短期偿债能力。', answer: '流动' },
+  { chapter: '第10章 财务分析', text: '速动比率=(流动资产-____)/流动负债。', answer: '存货' },
+  { chapter: '第10章 财务分析', text: '资产负债率=____/资产总额×100%。', answer: '负债总额' },
+  { chapter: '第10章 财务分析', text: '净资产收益率=净利润/____×100%。', answer: '平均净资产' },
+
+  // 第11章
+  { chapter: '第11章 筹资管理', text: '借款资金成本=年利率×(1-____率)。', answer: '所得税' },
+  { chapter: '第11章 筹资管理', text: '发行股票属于____筹资方式。', answer: '权益' },
+  { chapter: '第11章 筹资管理', text: '补偿性余额会____借款的实际利率。', answer: '提高' },
+  { chapter: '第11章 筹资管理', text: '资本结构是指企业各种____资本的价值构成及比例。', answer: '长期' },
+
+  // 第12章
+  { chapter: '第12章 营运资金管理', text: '持有现金的三大动机：交易性、预防性、____。', answer: '投机性' },
+  { chapter: '第12章 营运资金管理', text: '经济订货批量模型假设不____缺货。', answer: '允许' },
+  { chapter: '第12章 营运资金管理', text: '应收账款机会成本=应收账款平均余额×____成本率。', answer: '资金' },
+  { chapter: '第12章 营运资金管理', text: '营运资金=流动资产-____负债。', answer: '流动' },
+
+  // 第13章
+  { chapter: '第13章 建设项目总投资构成及计算', text: '建设项目总投资=固定资产投资+____投资。', answer: '流动' },
+  { chapter: '第13章 建设项目总投资构成及计算', text: '建筑安装工程费按构成分为：人工费、____、施工机具使用费、企业管理费、利润、规费、税金。', answer: '材料费' },
+  { chapter: '第13章 建设项目总投资构成及计算', text: '工程建设其他费包括____使用费、建设管理费、研究试验费等。', answer: '土地' },
+  { chapter: '第13章 建设项目总投资构成及计算', text: '增值税=(到岸价+____+消费税)×增值税率。', answer: '关税' },
+
+  // 第14章
+  { chapter: '第14章 工程计价依据', text: '工程定额体系中，最基础的定额是____定额。', answer: '施工' },
+  { chapter: '第14章 工程计价依据', text: '工人工作时间中，必须消耗的时间包括：有效工作时间、休息时间、____时间。', answer: '不可避免的中断' },
+  { chapter: '第14章 工程计价依据', text: '材料消耗量=____用量+损耗量。', answer: '净' },
+  { chapter: '第14章 工程计价依据', text: '预算定额以____或扩大分项工程为对象。', answer: '分项工程' },
+
+  // 第15章
+  { chapter: '第15章 设计概算与施工图预算', text: '设计概算分三级：单位工程概算、____工程概算、建设项目总概算。', answer: '单项' },
+  { chapter: '第15章 设计概算与施工图预算', text: '初步设计深度不够、不能准确计算工程量时，宜采用____法编制概算。', answer: '概算指标' },
+  { chapter: '第15章 设计概算与施工图预算', text: '工程量清单计价法适用于实行____的工程。', answer: '招标' },
+  { chapter: '第15章 设计概算与施工图预算', text: '施工图预算的审查方法包括：逐项审查法、____审查法、对比审查法等。', answer: '标准预算' },
+
+  // 第16章
+  { chapter: '第16章 工程量清单计价', text: '工程量清单应由____人或其委托的造价咨询人编制。', answer: '招标' },
+  { chapter: '第16章 工程量清单计价', text: '分部分项工程量清单项目编码为____位。', answer: '12' },
+  { chapter: '第16章 工程量清单计价', text: '投标人____修改招标文件中的分部分项工程量。', answer: '不能（不得）' },
+  { chapter: '第16章 工程量清单计价', text: '工程量清单计价模式下，量的风险由____承担。', answer: '招标人' },
+
+  // 第17章
+  { chapter: '第17章 工程计量与支付', text: '已完工程量须经____双方核实确认。', answer: '发承包' },
+  { chapter: '第17章 工程计量与支付', text: '基准日后因法律法规变化导致价款变化的，应____合同价款。', answer: '调整' },
+  { chapter: '第17章 工程计量与支付', text: '索赔按目的分为工期索赔和____索赔。', answer: '费用' },
+  { chapter: '第17章 工程计量与支付', text: '质量保证金扣留比例通常为工程价款结算总额的____%。', answer: '3' },
+
+  // 第18章
+  { chapter: '第18章 工程总承包计价', text: '工程总承包项目宜采用____合同。', answer: '总价' },
+  { chapter: '第18章 工程总承包计价', text: '除发包人要求变更外，总承包合同总价一般____调整。', answer: '不予' },
+  { chapter: '第18章 工程总承包计价', text: '工程总承包费用包括勘察设计费、建安费、设备购置费和____管理费等。', answer: '总承包' },
+  { chapter: '第18章 工程总承包计价', text: '发包人要求变化引起的调整，应由任一方在____时间内提出。', answer: '规定' },
+
+  // 第19章
+  { chapter: '第19章 国际工程投标报价', text: '国际工程投标报价中，材料预算价格=出厂价+运杂费+运输损耗+____费。', answer: '采购保管' },
+  { chapter: '第19章 国际工程投标报价', text: '____报价法是在总价不变前提下调整各分项报价的高低。', answer: '不平衡' },
+  { chapter: '第19章 国际工程投标报价', text: '开办费通常不包括____管理费。', answer: '现场' },
+  { chapter: '第19章 国际工程投标报价', text: '国际工程报价组成中，____费用通常列在开办费中。', answer: '临时设施' },
+
+  // 第20章
+  { chapter: '第20章 工程计价数字化与智能化', text: 'BIM技术的核心优势是____+成本数据关联。', answer: '自动算量' },
+  { chapter: '第20章 工程计价数字化与智能化', text: 'AI在计价中主要辅助编制____和投资估算。', answer: '概预算' },
+  { chapter: '第20章 工程计价数字化与智能化', text: '大数据为工程造价____和指数的编制提供数据支撑。', answer: '指标' },
+  { chapter: '第20章 工程计价数字化与智能化', text: 'BIM可实现____与计价一体化。', answer: '设计' }
+];
+
+// ==================== 学习资料清单（云端版） ====================
+const RESOURCE_GROUPS = [
+  {
+    title: '核心教材与笔记',
+    items: [
+      { name: '电子教材（可搜索388页）', path: 'resources/2026一建《经济》电子教材（可搜索）.pdf', icon: 'book' },
+      { name: '四色笔记2.0（重点分级标注）', path: 'resources/233-经济-四色笔记2.0.pdf', icon: 'doc' },
+      { name: '思维导图（全书框架梳理）', path: 'resources/233-经济-思维导图.pdf', icon: 'doc' },
+      { name: '懒人学霸笔记【推荐】', path: 'resources/懒人学霸笔记【推荐】.pdf', icon: 'star' },
+      { name: '高频考点攻略', path: 'resources/233-经济-高频考点攻略.pdf', icon: 'star' }
+    ]
+  },
+  {
+    title: '张涌考点精讲班 · 讲义（43讲）',
+    items: [
+      { name: '全部43讲讲义PDF', path: 'pdf/', icon: 'doc' },
+      { name: '备考指导（张涌）', path: 'pdf/00.备考指导.pdf', icon: 'doc' },
+      { name: '教材变动分析', path: 'pdf/', icon: 'doc' }
+    ]
+  },
+  {
+    title: '题库 · 刷题练习',
+    items: [
+      { name: '经典母题400道【含答案+解析】', path: 'resources/233-经济-经典母题400道【含答案】.pdf', icon: 'quiz' },
+      { name: '历年真题 2020-2025', path: 'resources/233-经济-历年真题-2020-2025.pdf', icon: 'quiz' }
+    ]
+  },
+  {
+    title: '默写本 · 速记冲刺',
+    items: [
+      { name: '默写本【填空版】', path: 'resources/26一建经济默写本【填空版】.pdf', icon: 'list' },
+      { name: '默写本【完整版·答案】', path: 'resources/26一建经济默写本【完整版】.pdf', icon: 'list' }
+    ]
+  }
+];
+
+// ==================== IndexedDB  ====================
+const DB_NAME = 'learningHub';
+const DB_VERSION = 5;
+let db;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      const oldV = e.oldVersion;
+
+      if (oldV < 1) {
+        const store = d.createObjectStore('chapters', { keyPath: 'id' });
+        store.createIndex('subject', 'subject', { unique: false });
+        store.createIndex('completedAt', 'completedAt', { unique: false });
+
+        const logStore = d.createObjectStore('logs', { keyPath: 'id', autoIncrement: true });
+        logStore.createIndex('date', 'date', { unique: false });
+      }
+
+      if (oldV < 3) {
+        if (!d.objectStoreNames.contains('sections')) {
+          const secStore = d.createObjectStore('sections', { keyPath: 'id', autoIncrement: true });
+          secStore.createIndex('chapter', 'chapter', { unique: false });
+          secStore.createIndex('subject', 'subject', { unique: false });
+        }
+      }
+
+      // v4: 新增母题和默写 stores
+      if (oldV < 4) {
+        if (!d.objectStoreNames.contains('quiz_items')) {
+          const qi = d.createObjectStore('quiz_items', { keyPath: 'id', autoIncrement: true });
+          qi.createIndex('chapter', 'chapter', { unique: false });
+        }
+        if (!d.objectStoreNames.contains('quiz_results')) {
+          const qr = d.createObjectStore('quiz_results', { keyPath: 'id', autoIncrement: true });
+          qr.createIndex('questionId', 'questionId', { unique: false });
+          qr.createIndex('date', 'date', { unique: false });
+        }
+        if (!d.objectStoreNames.contains('dictation_items')) {
+          const di = d.createObjectStore('dictation_items', { keyPath: 'id', autoIncrement: true });
+          di.createIndex('chapter', 'chapter', { unique: false });
+        }
+        if (!d.objectStoreNames.contains('dictation_results')) {
+          const dr = d.createObjectStore('dictation_results', { keyPath: 'id', autoIncrement: true });
+          dr.createIndex('itemId', 'itemId', { unique: false });
+          dr.createIndex('date', 'date', { unique: false });
+        }
+      }
+
+      // v5: 小节结构重构（75教科书小节 → 43讲次），清空旧数据重建
+      if (oldV < 5) {
+        if (d.objectStoreNames.contains('sections')) {
+          d.deleteObjectStore('sections');
+        }
+        const secStore = d.createObjectStore('sections', { keyPath: 'id', autoIncrement: true });
+        secStore.createIndex('chapter', 'chapter', { unique: false });
+        secStore.createIndex('subject', 'subject', { unique: false });
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
+
+// ==================== DB 操作函数 ====================
+async function initChaptersIfEmpty() {
+  const tx = db.transaction('chapters', 'readonly');
+  const count = await new Promise(r => { const req = tx.objectStore('chapters').count(); req.onsuccess = () => r(req.result); });
+  if (count === 0) {
+    const tx2 = db.transaction(['chapters', 'sections'], 'readwrite');
+    const store = tx2.objectStore('chapters');
+    const secStore = tx2.objectStore('sections');
+    let id = 0;
+    for (const [subject, chapters] of Object.entries(CHAPTERS)) {
+      if (!Array.isArray(chapters)) continue;
+      for (const ch of chapters) {
+        store.add({ id: ++id, subject, name: ch, status: 'todo', completedAt: null });
+      }
+    }
+    for (const entry of ECON_SECTIONS) {
+      for (const s of entry.sections) {
+        secStore.add({ subject: '经济', chapter: entry.chapter, name: s.name, status: 'todo', completedAt: null });
+      }
+    }
+    await new Promise(r => { tx2.oncomplete = r; });
+  }
+  // 检查补充小节
+  const tx3 = db.transaction('sections', 'readonly');
+  const secCount = await new Promise(r => { const req = tx3.objectStore('sections').count(); req.onsuccess = () => r(req.result); });
+  if (secCount === 0) {
+    const tx4 = db.transaction('sections', 'readwrite');
+    const secStore2 = tx4.objectStore('sections');
+    for (const entry of ECON_SECTIONS) {
+      for (const s of entry.sections) {
+        secStore2.add({ subject: '经济', chapter: entry.chapter, name: s.name, status: 'todo', completedAt: null });
+      }
+    }
+    await new Promise(r => { tx4.oncomplete = r; });
+  }
+}
+
+// 初始化题库和默写库
+async function initQuizAndDictation() {
+  const tx = db.transaction('quiz_items', 'readonly');
+  const count = await new Promise(r => { const req = tx.objectStore('quiz_items').count(); req.onsuccess = () => r(req.result); });
+  if (count === 0) {
+    const tx2 = db.transaction('quiz_items', 'readwrite');
+    const store = tx2.objectStore('quiz_items');
+    for (const q of QUIZ_ITEMS) {
+      store.add({ chapter: q.chapter, question: q.question, options: q.options, answer: q.answer, analysis: q.analysis });
+    }
+    await new Promise(r => { tx2.oncomplete = r; });
+  }
+
+  const tx3 = db.transaction('dictation_items', 'readonly');
+  const dCount = await new Promise(r => { const req = tx3.objectStore('dictation_items').count(); req.onsuccess = () => r(req.result); });
+  if (dCount === 0) {
+    const tx4 = db.transaction('dictation_items', 'readwrite');
+    const store2 = tx4.objectStore('dictation_items');
+    for (const d of DICTATION_ITEMS) {
+      store2.add({ chapter: d.chapter, text: d.text, answer: d.answer });
+    }
+    await new Promise(r => { tx4.oncomplete = r; });
+  }
+}
+
+// ==================== 通用 DB 操作 ====================
+async function getAllChapters() {
+  const tx = db.transaction('chapters', 'readonly');
+  return new Promise(r => { tx.objectStore('chapters').getAll().onsuccess = e => r(e.target.result); });
+}
+
+async function updateChapter(id, status) {
+  const tx = db.transaction('chapters', 'readwrite');
+  const store = tx.objectStore('chapters');
+  const chapter = await new Promise(r => { store.get(id).onsuccess = e => r(e.target.result); });
+  if (chapter) {
+    chapter.status = status;
+    chapter.completedAt = status === 'done' ? new Date().toISOString().split('T')[0] : null;
+    store.put(chapter);
+    await new Promise(r => { tx.oncomplete = r; });
+  }
+}
+
+async function getAllSections() {
+  const tx = db.transaction('sections', 'readonly');
+  return new Promise(r => { tx.objectStore('sections').getAll().onsuccess = e => r(e.target.result); });
+}
+
+async function getSectionsByChapter(chapterName) {
+  const tx = db.transaction('sections', 'readonly');
+  return new Promise(r => { tx.objectStore('sections').index('chapter').getAll(chapterName).onsuccess = e => r(e.target.result); });
+}
+
+async function updateSection(id, status) {
+  const tx = db.transaction('sections', 'readwrite');
+  const store = tx.objectStore('sections');
+  const section = await new Promise(r => { store.get(id).onsuccess = e => r(e.target.result); });
+  if (section) {
+    section.status = status;
+    section.completedAt = status === 'done' ? new Date().toISOString().split('T')[0] : null;
+    store.put(section);
+    await new Promise(r => { tx.oncomplete = r; });
+  }
+}
+
+async function getLogsByDate(date) {
+  const tx = db.transaction('logs', 'readonly');
+  return new Promise(r => { tx.objectStore('logs').index('date').getAll(date).onsuccess = e => r(e.target.result); });
+}
+
+async function getAllLogs() {
+  const tx = db.transaction('logs', 'readonly');
+  return new Promise(r => { tx.objectStore('logs').getAll().onsuccess = e => r(e.target.result); });
+}
+
+async function saveLog(log) {
+  const tx = db.transaction('logs', 'readwrite');
+  tx.objectStore('logs').add(log);
+  await new Promise(r => { tx.oncomplete = r; });
+}
+
+// ==================== 母题操作 ====================
+let _quizItemsCache = null;
+async function getQuizItems(chapter) {
+  if (!_quizItemsCache) {
+    const tx = db.transaction('quiz_items', 'readonly');
+    _quizItemsCache = await new Promise(r => { tx.objectStore('quiz_items').getAll().onsuccess = e => r(e.target.result); });
+  }
+  if (chapter) return _quizItemsCache.filter(q => q.chapter === chapter);
+  return _quizItemsCache;
+}
+
+async function getQuizChapters() {
+  const items = await getQuizItems();
+  return [...new Set(items.map(q => q.chapter))];
+}
+
+async function getQuizResults() {
+  const tx = db.transaction('quiz_results', 'readonly');
+  return new Promise(r => { tx.objectStore('quiz_results').getAll().onsuccess = e => r(e.target.result); });
+}
+
+async function saveQuizResult(questionId, correct) {
+  const tx = db.transaction('quiz_results', 'readwrite');
+  tx.objectStore('quiz_results').add({ questionId, date: new Date().toISOString().split('T')[0], correct });
+  await new Promise(r => { tx.oncomplete = r; });
+}
+
+// ==================== 默写操作 ====================
+let _dictationItemsCache = null;
+async function getDictationItems(chapter) {
+  if (!_dictationItemsCache) {
+    const tx = db.transaction('dictation_items', 'readonly');
+    _dictationItemsCache = await new Promise(r => { tx.objectStore('dictation_items').getAll().onsuccess = e => r(e.target.result); });
+  }
+  if (chapter) return _dictationItemsCache.filter(d => d.chapter === chapter);
+  return _dictationItemsCache;
+}
+
+async function getDictationChapters() {
+  const items = await getDictationItems();
+  return [...new Set(items.map(d => d.chapter))];
+}
+
+async function getDictationResults() {
+  const tx = db.transaction('dictation_results', 'readonly');
+  return new Promise(r => { tx.objectStore('dictation_results').getAll().onsuccess = e => r(e.target.result); });
+}
+
+async function saveDictationResult(itemId, correct) {
+  const tx = db.transaction('dictation_results', 'readwrite');
+  tx.objectStore('dictation_results').add({ itemId, date: new Date().toISOString().split('T')[0], correct });
+  await new Promise(r => { tx.oncomplete = r; });
+}
+
+// ==================== 统计 ====================
+async function getStats() {
+  const chapters = await getAllChapters();
+  const allSections = await getAllSections();
+  const quizResults = await getQuizResults();
+
+  const total = chapters.length;
+  const done = chapters.filter(c => c.status === 'done').length;
+
+  const subjectStats = {};
+  for (const s of SUBJECTS) {
+    if (s.id === '经济') {
+      const totalSec = allSections.length;
+      const doneSec = allSections.filter(sec => sec.status === 'done').length;
+      subjectStats[s.id] = { total: totalSec, done: doneSec, pct: totalSec ? Math.round(doneSec / totalSec * 100) : 0 };
+    } else {
+      const sc = chapters.filter(c => c.subject === s.id);
+      const sd = sc.filter(c => c.status === 'done').length;
+      subjectStats[s.id] = { total: sc.length, done: sd, pct: sc.length ? Math.round(sd / sc.length * 100) : 0 };
+    }
+  }
+
+  const logs = await getAllLogs();
+  const totalQuestions = logs.reduce((sum, l) => sum + (l.questions || 0), 0) + quizResults.length;
+  const totalMinutes = logs.reduce((sum, l) => sum + (l.duration || 0), 0);
+  const uniqueDays = new Set(logs.map(l => l.date)).size;
+
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    if (logs.filter(l => l.date === dateStr).length > 0) streak++;
+    else { if (i > 0) break; else break; }
+  }
+
+  const econDone = allSections.filter(s => s.status === 'done').length;
+  const econTotal = allSections.length;
+  const otherDone = chapters.filter(c => c.subject !== '经济' && c.status === 'done').length;
+  const otherTotal = chapters.filter(c => c.subject !== '经济').length;
+  const overallPct = (econTotal + otherTotal) ? Math.round((econDone + otherDone) / (econTotal + otherTotal) * 100) : 0;
+
+  const quizCorrect = quizResults.filter(r => r.correct).length;
+
+  return {
+    total, done,
+    pct: overallPct,
+    subjectStats,
+    totalQuestions,
+    quizTotal: quizResults.length,
+    quizCorrect,
+    totalHours: Math.round(totalMinutes / 60 * 10) / 10,
+    totalDays: uniqueDays,
+    streak
+  };
+}
+
+// ==================== 艾宾浩斯复盘 ====================
+const EBBINGHAUS_DAYS = [1, 3, 7, 15, 30];
+
+async function getReviewTasks() {
+  const chapters = await getAllChapters();
+  const doneChapters = chapters.filter(c => c.status === 'done' && c.completedAt);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  const reviewList = [];
+  for (const ch of doneChapters) {
+    const completedDate = new Date(ch.completedAt); completedDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today - completedDate) / (1000 * 60 * 60 * 24));
+    if (EBBINGHAUS_DAYS.includes(diffDays)) {
+      reviewList.push({ ...ch, reviewDay: diffDays });
+    }
+  }
+  return reviewList.sort((a, b) => b.reviewDay - a.reviewDay);
+}
+
+// ==================== UI 渲染 ====================
+
+// 倒计时
+function renderCountdown() {
+  const examDate = new Date('2026-09-22');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
+  const el1 = document.getElementById('countdown-days');
+  const el2 = document.getElementById('countdown-days2');
+  if (el1) el1.textContent = diff;
+  if (el2) el2.textContent = diff;
+}
+
+// 科目进度
+function renderSubjectProgress(stats, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = SUBJECTS.map(s => {
+    const pct = stats.subjectStats[s.id].pct;
+    const done = stats.subjectStats[s.id].done;
+    const total = stats.subjectStats[s.id].total;
+    return `<div class="subject-row">
+      <div class="subject-name">${s.name}</div>
+      <div class="subject-bar-wrap"><div class="subject-bar ${s.color}" style="width:${pct}%"></div></div>
+      <div class="subject-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+// 今日任务
+async function renderTasks() {
+  const taskList = document.getElementById('task-list');
+  if (!taskList) return;
+  const reviewTasks = await getReviewTasks();
+  const chapters = await getAllChapters();
+  const doingChapters = chapters.filter(c => c.status === 'doing');
+
+  const tasks = [];
+  if (doingChapters.length > 0) {
+    const ch = doingChapters[0];
+    tasks.push({ type: 'study', text: `${ch.subject} - ${ch.name}`, tag: '新课' });
+  }
+  tasks.push({ type: 'quiz', text: '母题练习（建议20题/天）', tag: '刷题' });
+  tasks.push({ type: 'dictation', text: '默写回顾（选择1章填空自测）', tag: '默写' });
+  for (const rt of reviewTasks) {
+    tasks.push({ type: 'review', text: `${rt.subject} - ${rt.name} (第${rt.reviewDay}天复习)`, tag: '复盘' });
+  }
+
+  if (tasks.length === 0) {
+    taskList.innerHTML = '<li class="empty-state"><p>暂无今日任务，去一建页面标记学习内容吧</p></li>';
+    document.getElementById('today-badge').textContent = '0 / 0';
+    return;
+  }
+
+  let doneCount = 0;
+  const today = new Date().toISOString().split('T')[0];
+  const todayLogs = await getLogsByDate(today);
+
+  taskList.innerHTML = tasks.map((t, i) => {
+    const checked = todayLogs.length > 0 && i < todayLogs.length;
+    if (checked) doneCount++;
+    return `<li class="task-item">
+      <div class="task-checkbox ${checked ? 'done' : ''}">${checked ? '\u2713' : ''}</div>
+      <span class="task-tag ${t.type}">${t.tag}</span>
+      <span>${t.text}</span>
+    </li>`;
+  }).join('');
+  document.getElementById('today-badge').textContent = `${doneCount} / ${tasks.length}`;
+}
+
+// 热力图
+async function renderHeatmap() {
+  const container = document.getElementById('heatmap');
+  if (!container) return;
+  const logs = await getAllLogs();
+  const quizResults = await getQuizResults();
+  const dictResults = await getDictationResults();
+  const today = new Date();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+
+  const cells = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(today.getFullYear(), today.getMonth(), d);
+    const dateStr = date.toISOString().split('T')[0];
+    const dayLogs = logs.filter(l => l.date === dateStr);
+    const dayQuiz = quizResults.filter(r => r.date === dateStr);
+    const dayDict = dictResults.filter(r => r.date === dateStr);
+    const activity = dayLogs.reduce((s, l) => s + (l.questions || 0) + (l.duration || 0) / 10, 0) + dayQuiz.length + dayDict.length;
+
+    let level = '';
+    if (activity > 0 && activity <= 5) level = 'l1';
+    else if (activity <= 15) level = 'l2';
+    else if (activity <= 30) level = 'l3';
+    else if (activity > 30) level = 'l4';
+    cells.push(`<div class="heatmap-cell ${level}" title="${dateStr}: ${activity}个活动"></div>`);
+  }
+  container.innerHTML = cells.join('');
+}
+
+// 待复盘列表
+async function renderReviewList() {
+  const container = document.getElementById('review-list');
+  if (!container) return;
+  const reviewTasks = await getReviewTasks();
+  if (reviewTasks.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>暂无待复盘内容</p></div>';
+    document.getElementById('review-badge').textContent = '0';
+    return;
+  }
+  container.innerHTML = reviewTasks.map(rt => `
+    <div class="chapter-item">
+      <div class="chapter-status done"></div>
+      <span>${rt.subject} - ${rt.name}</span>
+      <span class="chapter-date">第${rt.reviewDay}天复习</span>
+    </div>
+  `).join('');
+  document.getElementById('review-badge').textContent = reviewTasks.length;
+}
+
+// 周刷题图表
+async function renderWeeklyChart() {
+  const container = document.getElementById('weekly-chart');
+  if (!container) return;
+  const logs = await getAllLogs();
+  const quizResults = await getQuizResults();
+  const today = new Date();
+  const weekData = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const dayQuiz = quizResults.filter(r => r.date === dateStr).length;
+    const dayLogQuiz = logs.filter(l => l.date === dateStr).reduce((s, l) => s + (l.questions || 0), 0);
+    weekData.push({ label: `${d.getMonth() + 1}/${d.getDate()}`, value: dayLogQuiz + dayQuiz, isToday: i === 0 });
+  }
+
+  const maxVal = Math.max(...weekData.map(d => d.value), 1);
+  const barHeight = 160;
+
+  container.innerHTML = `<div style="display:flex;align-items:flex-end;gap:16px;height:${barHeight + 30}px;padding:10px 0;">
+    ${weekData.map(d => {
+      const h = Math.max((d.value / maxVal) * barHeight, 4);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
+        <span style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">${d.value}题</span>
+        <div style="width:100%;max-width:60px;height:${h}px;background:${d.isToday ? 'var(--accent)' : '#d0ebff'};border-radius:6px 6px 0 0;"></div>
+        <span style="font-size:11px;color:var(--text-muted);margin-top:6px;">${d.label}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ==================== 子Tab切换 ====================
+let currentSubtab = 'progress';
+function switchToSubtab(name) {
+  currentSubtab = name;
+  document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.subtab[data-subtab="${name}"]`).classList.add('active');
+  document.querySelectorAll('[id^="subtab-"]').forEach(el => el.style.display = 'none');
+  const panel = document.getElementById('subtab-' + name);
+  if (panel) panel.style.display = 'block';
+  if (name === 'quiz') renderQuizTab();
+  if (name === 'dictation') renderDictationTab();
+  if (name === 'resources') renderResourcesTab();
+}
+
+// ==================== 学习进度渲染 ====================
+let econExpanded = {};
+let partExpanded = { '第一篇 工程经济': true, '第二篇 工程财务': true, '第三篇 工程计价': true };
+
+async function renderEconChapters() {
+  const container = document.getElementById('econ-chapter-list');
+  if (!container) return;
+  const allSections = await getAllSections();
+
+  const chapterSecStats = {};
+  for (const entry of ECON_SECTIONS) {
+    const secs = allSections.filter(s => s.chapter === entry.chapter);
+    chapterSecStats[entry.chapter] = { total: secs.length, done: secs.filter(s => s.status === 'done').length };
+  }
+
+  let html = '';
+
+  for (const part of ECON_PARTS) {
+    const isPartOpen = partExpanded[part.name] !== false;
+    const safePartName = part.name.replace(/'/g, "\\'");
+    html += `<div class="part-title" onclick="toggleEconPart('${safePartName}')">
+      <span class="part-expand-icon">${isPartOpen ? '▼' : '▶'}</span>
+      ${part.name} <span class="part-lectures">共 ${part.lectures} 讲（${part.range}）</span>
+    </div>`;
+
+    if (isPartOpen) {
+    for (const chName of part.chapters) {
+      const entry = ECON_SECTIONS.find(e => e.chapter.startsWith(chName));
+      if (!entry) continue;
+      const fullChapterName = entry.chapter;
+      const stats = chapterSecStats[fullChapterName] || { total: 0, done: 0 };
+      const pct = stats.total ? Math.round(stats.done / stats.total * 100) : 0;
+      const isExpanded = econExpanded[chName] || false;
+      const safeName = chName.replace(/'/g, "\\'");
+
+      let sectionHtml = '';
+      if (isExpanded) {
+        const secs = allSections.filter(s => s.chapter === fullChapterName);
+        sectionHtml = secs.map(s => {
+          const secDef = entry.sections.find(sd => sd.name === s.name);
+          const lectInfo = secDef ? secDef.lect : '';
+          const safePdf = secDef ? (JINGJIANG_DIR + '/' + secDef.pdf).replace(/\\/g, '\\\\').replace(/'/g, "\\'") : '';
+          return `<div class="section-row" onclick="cycleSectionStatus(${s.id}, '${s.status}');event.stopPropagation();">
+            <div class="section-status ${s.status}"></div>
+            <span style="${s.status === 'done' ? 'text-decoration:line-through;color:var(--text-muted)' : ''}">${s.name}</span>
+            ${lectInfo ? `<span class="section-lecture">${lectInfo}</span>` : ''}
+            ${secDef ? `<span class="chapter-res-link" onclick="openLocalFile('${safePdf}');event.stopPropagation();">📄</span>` : ''}
+            ${s.completedAt ? `<span class="chapter-date">${s.completedAt}</span>` : ''}
+          </div>`;
+        }).join('');
+      }
+
+      html += `<div class="chapter-group" style="margin-bottom:0;">
+        <div class="chapter-item" onclick="toggleEconChapter('${safeName}')">
+          <span class="chapter-expand ${isExpanded ? 'open' : ''}">\u25b6</span>
+          <div class="chapter-status ${stats.done === stats.total && stats.total > 0 ? 'done' : stats.done > 0 ? 'doing' : 'todo'}"></div>
+          <span>${chName}</span>
+          <span class="chapter-pct">${pct}%</span>
+          <span class="part-lectures" style="font-size:11px;color:var(--text-muted);margin-left:6px;">${entry.sections.length}讲</span>
+        </div>
+        <div class="section-list">${sectionHtml}</div>
+      </div>`;
+    }
+    }
+  }
+  container.innerHTML = html;
+}
+
+function toggleEconChapter(chapterName) {
+  econExpanded[chapterName] = !econExpanded[chapterName];
+  renderEconChapters();
+}
+
+function toggleEconPart(partName) {
+  partExpanded[partName] = partExpanded[partName] === false ? true : false;
+  renderEconChapters();
+}
+
+async function cycleSectionStatus(id, currentStatus) {
+  const next = currentStatus === 'todo' ? 'doing' : currentStatus === 'doing' ? 'done' : 'todo';
+  await updateSection(id, next);
+  toast(next === 'done' ? '讲次已标记完成' : next === 'doing' ? '讲次标记为学习中' : '讲次已重置');
+  await refreshAll();
+}
+
+// ==================== 母题练习渲染 ====================
+let quizChapterFilter = '全部';
+
+async function renderQuizTab() {
+  const container = document.getElementById('quiz-list');
+  const statsContainer = document.getElementById('quiz-stats');
+  const selectContainer = document.getElementById('quiz-chapter-select');
+  if (!container) return;
+
+  const allItems = await getQuizItems();
+  const results = await getQuizResults();
+
+  // 统计
+  const quizChapters = await getQuizChapters();
+  const correct = results.filter(r => r.correct).length;
+  statsContainer.innerHTML = `
+    <div class="stat"><div class="num">${allItems.length}</div>题库总数</div>
+    <div class="stat"><div class="num">${results.length}</div>已练习</div>
+    <div class="stat"><div class="num">${correct}</div>做对</div>
+    <div class="stat"><div class="num">${results.length ? Math.round(correct/results.length*100) : 0}%</div>正确率</div>
+  `;
+
+  // 章节筛选
+  selectContainer.innerHTML = `<span class="quiz-chapter-tag ${quizChapterFilter === '全部' ? 'active' : ''}" onclick="filterQuizChapter('全部')">全部</span>` +
+    quizChapters.map(ch => {
+      const short = ch.replace('第', '').replace('章', '').split(' ')[1] || ch.substring(0, 10);
+      return `<span class="quiz-chapter-tag ${quizChapterFilter === ch ? 'active' : ''}" onclick="filterQuizChapter('${ch.replace(/'/g, "\\'")}')">${short}</span>`;
+    }).join('');
+
+  // 题目列表
+  const items = quizChapterFilter === '全部' ? allItems : allItems.filter(q => q.chapter === quizChapterFilter);
+  const answeredIds = new Set(results.map(r => r.questionId));
+  const correctIds = new Set(results.filter(r => r.correct).map(r => r.questionId));
+
+  container.innerHTML = items.map((q, i) => {
+    const answered = answeredIds.has(q.id);
+    const isCorrect = correctIds.has(q.id);
+    const qId = q.id;
+    return `<div class="quiz-card">
+      <div class="q-num">${quizChapterFilter === '全部' ? '【' + q.chapter.substring(0, 12) + '】' : ''} 第${i+1}题 ${answered ? (isCorrect ? '✅ 已做对' : '❌ 已做错') : '🆕 未做'}</div>
+      <div class="q-text">${q.question.replace(/\n/g, '<br>')}</div>
+      ${q.options ? `<div class="q-options">${q.options.map(o => `<div class="q-option" id="opt-${qId}-${o.charAt(0)}" onclick="selectOption(${qId}, '${o.charAt(0)}')">${o}</div>`).join('')}</div>` : ''}
+      <button class="btn btn-outline btn-sm" onclick="toggleAnswer(${qId})">查看答案</button>
+      <div class="quiz-answer" id="answer-${qId}">
+        <span class="answer-label">正确答案：${q.answer}</span><br>
+        <span style="color:var(--text-secondary);">${q.analysis}</span>
+      </div>
+      <div class="quiz-self-eval" id="eval-${qId}">
+        <button class="eval-correct eval-btn" onclick="evalQuiz(${qId}, true)">✅ 做对了</button>
+        <button class="eval-wrong eval-btn" onclick="evalQuiz(${qId}, false)">❌ 做错了</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>该章节暂未录入母题，可手动在代码中扩充</p></div>';
+  }
+}
+
+function filterQuizChapter(chapter) {
+  quizChapterFilter = chapter;
+  renderQuizTab();
+}
+
+function selectOption(qId, optLetter) {
+  // 清除该题所有选项的高亮
+  document.querySelectorAll(`[id^="opt-${qId}-"]`).forEach(el => {
+    el.classList.remove('correct', 'wrong');
+  });
+  // 高亮选中项
+  const selected = document.getElementById(`opt-${qId}-${optLetter}`);
+  if (selected) selected.classList.add('correct');
+}
+
+function toggleAnswer(qId) {
+  const answerEl = document.getElementById('answer-' + qId);
+  const evalEl = document.getElementById('eval-' + qId);
+  if (answerEl) answerEl.classList.toggle('show');
+  if (evalEl) evalEl.classList.toggle('show');
+}
+
+async function evalQuiz(qId, correct) {
+  await saveQuizResult(qId, correct);
+  toast(correct ? '已记录：做对了！' : '已记录：做错了，加油复习！');
+  _quizItemsCache = null; // 清除缓存以便获取最新统计
+  await renderQuizTab();
+  await refreshHome();
+}
+
+// ==================== 默写回顾渲染 ====================
+let dictationChapterFilter = '全部';
+
+async function renderDictationTab() {
+  const container = document.getElementById('dictation-list');
+  const statsContainer = document.getElementById('dictation-stats');
+  const selectContainer = document.getElementById('dictation-chapter-select');
+  if (!container) return;
+
+  const allItems = await getDictationItems();
+  const results = await getDictationResults();
+  const chapters = await getDictationChapters();
+
+  const correct = results.filter(r => r.correct).length;
+  statsContainer.innerHTML = `
+    <div class="stat"><div class="num">${allItems.length}</div>填空总数</div>
+    <div class="stat"><div class="num">${results.length}</div>已练习</div>
+    <div class="stat"><div class="num">${correct}</div>答对</div>
+    <div class="stat"><div class="num">${results.length ? Math.round(correct/results.length*100) : 0}%</div>正确率</div>
+  `;
+
+  selectContainer.innerHTML = `<span class="quiz-chapter-tag ${dictationChapterFilter === '全部' ? 'active' : ''}" onclick="filterDictationChapter('全部')">全部</span>` +
+    chapters.map(ch => {
+      const short = ch.replace('第', '').replace('章', '').split(' ')[1] || ch.substring(0, 10);
+      return `<span class="quiz-chapter-tag ${dictationChapterFilter === ch ? 'active' : ''}" onclick="filterDictationChapter('${ch.replace(/'/g, "\\'")}')">${short}</span>`;
+    }).join('');
+
+  const items = dictationChapterFilter === '全部' ? allItems : allItems.filter(d => d.chapter === dictationChapterFilter);
+  const answeredIds = new Set(results.map(r => r.itemId));
+  const correctIds = new Set(results.filter(r => r.correct).map(r => r.itemId));
+
+  container.innerHTML = items.map((d, i) => {
+    const answered = answeredIds.has(d.id);
+    const isCorrect = correctIds.has(d.id);
+    const dId = d.id;
+    const displayText = d.text.replace('____', '<span class="d-blank" id="blank-' + dId + '">?</span>');
+    return `<div class="dictation-card">
+      <div class="q-num">${dictationChapterFilter === '全部' ? '【' + d.chapter.substring(0, 12) + '】' : ''} 第${i+1}题 ${answered ? (isCorrect ? '✅ 已答对' : '❌ 已答错') : '🆕 未做'}</div>
+      <div class="d-text">${displayText}</div>
+      <div class="d-input-row">
+        <input type="text" class="d-input" id="dinput-${dId}" placeholder="输入你的答案...">
+        <button class="btn btn-primary btn-sm" onclick="checkDictation(${dId}, '${d.answer.replace(/'/g, "\\'")}')">核对</button>
+        ${answered ? `<button class="btn btn-outline btn-sm" onclick="retryDictation(${dId})">重做</button>` : ''}
+      </div>
+      <div class="dictation-result" id="dresult-${dId}"></div>
+    </div>`;
+  }).join('');
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>该章节暂未录入默写条目，可手动扩充</p></div>';
+  }
+}
+
+function filterDictationChapter(chapter) {
+  dictationChapterFilter = chapter;
+  renderDictationTab();
+}
+
+function checkDictation(itemId, answer) {
+  const input = document.getElementById('dinput-' + itemId);
+  const resultEl = document.getElementById('dresult-' + itemId);
+  const blankEl = document.getElementById('blank-' + itemId);
+  if (!input) return;
+
+  const userAnswer = input.value.trim();
+  const isCorrect = userAnswer === answer || userAnswer.replace(/\s/g, '') === answer.replace(/\s/g, '');
+
+  resultEl.className = 'dictation-result show ' + (isCorrect ? 'right' : 'wrong-result');
+  resultEl.innerHTML = isCorrect
+    ? '✅ 正确！答案：' + answer
+    : '❌ 不正确。正确答案：<strong>' + answer + '</strong>，你的答案：' + (userAnswer || '(空)');
+
+  if (blankEl) blankEl.textContent = answer;
+  saveDictationResult(itemId, isCorrect);
+  toast(isCorrect ? '回答正确！' : '已回答，加油！');
+  setTimeout(() => renderDictationTab(), 800);
+}
+
+function retryDictation(itemId) {
+  const input = document.getElementById('dinput-' + itemId);
+  const resultEl = document.getElementById('dresult-' + itemId);
+  const blankEl = document.getElementById('blank-' + itemId);
+  if (input) input.value = '';
+  if (resultEl) { resultEl.className = 'dictation-result'; resultEl.innerHTML = ''; }
+  if (blankEl) blankEl.textContent = '?';
+}
+
+// ==================== 学习资料渲染 ====================
+function renderResourcesTab() {
+  const container = document.getElementById('econ-resources-all');
+  if (!container) return;
+
+  const iconMap = { book: 'book', video: 'video', doc: 'doc', list: 'list', star: 'star', quiz: 'quiz' };
+  const emojiMap = { book: '📖', video: '🎬', doc: '📄', list: '📋', star: '⭐', quiz: '✅' };
+
+  container.innerHTML = RESOURCE_GROUPS.map(group => `
+    <div class="resource-section">
+      <div class="resource-section-title">${group.title}</div>
+      <div class="resource-grid">
+        ${group.items.map(r => {
+          const fullPath = (BASE_DIR + '/' + r.path).replace(/\\/g, '/');
+          const safePath = fullPath.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          return `<div class="resource-card" onclick="openLocalFile('${safePath}')">
+            <div class="resource-icon ${r.icon}">${emojiMap[r.icon] || '📄'}</div>
+            <div>
+              <div class="r-name">${r.name}</div>
+              <div class="r-type">点击打开文件</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== 其他三科 ====================
+async function renderOtherChapters() {
+  const container = document.getElementById('other-chapter-list');
+  if (!container) return;
+  const chapters = await getAllChapters();
+  const otherSubjects = SUBJECTS.filter(s => s.id !== '经济');
+
+  container.innerHTML = otherSubjects.map(s => {
+    const sc = chapters.filter(c => c.subject === s.id);
+    const done = sc.filter(c => c.status === 'done').length;
+    return `<div class="chapter-group">
+      <div class="chapter-group-title">${s.name}</div>
+      <div class="chapter-group-sub">已完成 ${done}/${sc.length} 章节</div>
+      ${sc.map(c => `
+        <div class="chapter-item" onclick="cycleChapterStatus(${c.id}, '${c.status}')">
+          <div class="chapter-status ${c.status}"></div>
+          <span style="${c.status === 'done' ? 'text-decoration:line-through;color:var(--text-muted)' : ''}">${c.name}</span>
+          ${c.completedAt ? '<span class="chapter-date">学完于 ' + c.completedAt + '</span>' : ''}
+        </div>
+      `).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ==================== 文件打开 ====================
+// 云端模式：统一使用相对路径
+function openLocalFile(path) {
+  const relativePath = path.replace(/\\/g, '/').replace(/^\.\//, '');
+  window.open(relativePath, '_blank');
+}
+
+function openBaiduNetdiskVideo(path) {
+  const netdiskUrl = 'baiduyunguanjia://open';
+  const win = window.open(netdiskUrl, '_blank');
+  if (!win || win.closed || typeof win.closed === 'undefined') {
+    const a = document.createElement('a');
+    a.href = netdiskUrl; a.target = '_blank'; a.click();
+  }
+  toast('正在唤起百度网盘客户端...');
+}
+
+// ==================== 章节状态循环 ====================
+async function cycleChapterStatus(id, currentStatus) {
+  const next = currentStatus === 'todo' ? 'doing' : currentStatus === 'doing' ? 'done' : 'todo';
+  await updateChapter(id, next);
+  toast(next === 'done' ? '已标记完成，已加入复盘计划' : next === 'doing' ? '已标记为学习中' : '已重置为未开始');
+  await refreshAll();
+}
+
+// ==================== 首页刷新 ====================
+async function refreshHome() {
+  renderCountdown();
+  const stats = await getStats();
+  renderSubjectProgress(stats, 'subject-progress');
+  const elD = document.getElementById('stat-days');
+  const elS = document.getElementById('stat-streak');
+  const elQ = document.getElementById('stat-questions');
+  const elH = document.getElementById('stat-hours');
+  const elO = document.getElementById('stat-overall');
+  if (elD) elD.textContent = stats.totalDays;
+  if (elS) elS.textContent = stats.streak;
+  if (elQ) elQ.textContent = stats.totalQuestions;
+  if (elH) elH.textContent = stats.totalHours;
+  if (elO) elO.textContent = stats.pct + '%';
+  await renderTasks();
+  await renderHeatmap();
+  await renderReviewList();
+  await renderWeeklyChart();
+}
+
+// ==================== 一建页面刷新 ====================
+async function refreshYijian() {
+  renderCountdown();
+  const stats = await getStats();
+  renderSubjectProgress(stats, 'subject-progress2');
+  await renderEconChapters();
+  await renderOtherChapters();
+  if (currentSubtab === 'quiz') await renderQuizTab();
+  if (currentSubtab === 'dictation') await renderDictationTab();
+  if (currentSubtab === 'resources') renderResourcesTab();
+}
+
+async function refreshAll() {
+  const homeVisible = document.getElementById('page-home').style.display !== 'none';
+  const yijianVisible = document.getElementById('page-yijian').style.display !== 'none';
+  if (homeVisible) await refreshHome();
+  if (yijianVisible) await refreshYijian();
+}
+
+// ==================== 弹窗 ====================
+function openAddLog() {
+  document.getElementById('modal-log').style.display = 'flex';
+}
+
+function openStudyPlan() {
+  document.getElementById('modal-plan').style.display = 'flex';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+async function saveStudyLog() {
+  const subject = document.getElementById('log-subject').value;
+  const chapter = document.getElementById('log-chapter').value.trim();
+  const duration = parseInt(document.getElementById('log-duration').value) || 0;
+  const questions = parseInt(document.getElementById('log-questions').value) || 0;
+  const date = new Date().toISOString().split('T')[0];
+
+  if (!chapter) { toast('请输入章节名称'); return; }
+
+  await saveLog({ date, subject, chapter, duration, questions });
+  closeModal('modal-log');
+  document.getElementById('log-chapter').value = '';
+  document.getElementById('log-duration').value = '60';
+  document.getElementById('log-questions').value = '0';
+  toast('已记录学习日志');
+  await refreshAll();
+}
+
+// ==================== 导航 ====================
+document.querySelectorAll('.nav-tab:not(.disabled)').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const page = tab.dataset.tab;
+    document.getElementById('page-home').style.display = page === 'home' ? 'block' : 'none';
+    document.getElementById('page-yijian').style.display = page === 'yijian' ? 'block' : 'none';
+    if (page === 'home') refreshHome();
+    if (page === 'yijian') refreshYijian();
+  });
+});
+
+document.querySelectorAll('.subtab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    switchToSubtab(tab.dataset.subtab);
+  });
+});
+
+// ==================== Toast ====================
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2000);
+}
+
+// ==================== 重置数据 ====================
+function resetAllData() {
+  if (confirm('确定要重置所有学习数据吗？此操作不可逆！')) {
+    const tx = db.transaction(['chapters', 'logs', 'sections', 'quiz_items', 'quiz_results', 'dictation_items', 'dictation_results'], 'readwrite');
+    tx.objectStore('chapters').clear();
+    tx.objectStore('logs').clear();
+    tx.objectStore('sections').clear();
+    tx.objectStore('quiz_items').clear();
+    tx.objectStore('quiz_results').clear();
+    tx.objectStore('dictation_items').clear();
+    tx.objectStore('dictation_results').clear();
+    tx.oncomplete = async () => {
+      _quizItemsCache = null;
+      _dictationItemsCache = null;
+      await initChaptersIfEmpty();
+      await initQuizAndDictation();
+      await refreshAll();
+      toast('数据已重置');
+    };
+  }
+}
+
+// ==================== 初始化 ====================
+(async function init() {
+  await openDB();
+  await initChaptersIfEmpty();
+  await initQuizAndDictation();
+  await refreshHome();
+})();
+</script>
+
+</body>
+</html>
